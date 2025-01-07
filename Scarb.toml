@@ -1,0 +1,11 @@
+[workspace]
+members = ["contracts"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024_07"
+
+[workspace.dependencies]
+assert_macros = "2.9.2"
+snforge_std = "0.35.1"
+starknet = "2.9.2"

@@ -1,0 +1,294 @@
+**/*.lock
+.snfoundry_cache/
+
+#### PYTHON
+
+# Byte-compiled / optimized / DLL files
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+
+# C extensions
+**/*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+**/*.manifest
+**/*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+**/*.py,cover
+.hypothesis/
+.pytest_cache/
+**/*cover/
+
+# Translations
+**/*.mo
+**/*.pot
+
+# Django
+**/*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask
+instance/
+.webassets-cache/
+
+# Scrapy
+.scrapy/
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+**/.ipynb_checkpoints/
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+# Uncomment to ignore Pipfile.lock for collaboration
+#Pipfile.lock
+
+# poetry
+# Uncomment to ignore poetry.lock for collaboration
+#poetry.lock
+
+# pdm
+.pdm.toml
+.pdm-python
+.pdm-build/
+
+# PEP 582
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath
+**/*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder
+.spyderproject
+.spyproject
+
+# Rope
+.ropeproject/
+
+# mkdocs
+/site/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# pytype
+.pytype/
+
+# Cython debug
+cython_debug/
+
+# PyCharm
+# Uncomment to ignore the .idea folder
+#.idea/
+
+# PyPI configuration
+.pypirc
+
+#### NODE
+
+# Logs
+logs/
+**/*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Diagnostic reports
+**/report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+pids/
+**/*.pid
+**/*.seed
+**/*.pid.lock
+
+# Instrumented libs
+lib-cov/
+
+# Coverage directories
+coverage/
+**/*.lcov
+.nyc_output/
+
+# Grunt
+.grunt/
+
+# Bower
+bower_components/
+
+# node-waf
+.lock-wscript
+
+# Compiled binary addons
+build/Release/
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Snowpack
+web_modules/
+
+# TypeScript
+**/*.tsbuildinfo
+
+# npm cache
+.npm/
+
+# eslint cache
+.eslintcache
+
+# stylelint cache
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# REPL history
+.node_repl_history
+
+# npm pack output
+**/*.tgz
+
+# Yarn
+.yarn-integrity
+
+# dotenv files
+**/.env*
+**/.env.*.local
+
+# Parcel
+.cache/
+.parcel-cache/
+
+# Next.js
+.next/
+out/
+
+# Nuxt.js
+.nuxt/
+dist/
+
+# Gatsby
+.cache/
+
+# vuepress
+.vuepress/dist/
+
+# vitepress
+**/.vitepress/dist/
+**/.vitepress/cache/
+
+# Docusaurus
+.docusaurus/
+
+# Serverless
+.serverless/
+
+# FuseBox
+.fusebox/
+
+# DynamoDB Local
+.dynamodb/
+
+# TernJS
+.tern-port
+
+# VSCode test settings
+.vscode-test/
+
+# Yarn v2
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+#### RUST
+
+# Cargo
+debug/
+target/
+Cargo.lock
+
+# Rustfmt
+**/*.rs.bk
+
+# MSVC
+**/*.pdb
+
+# RustRover
+# Uncomment to ignore the .idea folder
+#.idea/
