@@ -1,6 +1,6 @@
 pragma circom 2.2.0;
 
-include "hash.circom";
+include "mockHash.circom";
 
 // Computes MiMC([left, right])
 template HashLeftRight() {

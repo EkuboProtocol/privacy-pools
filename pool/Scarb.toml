@@ -1,21 +1,25 @@
 [package]
-name = "contracts"
-version.workspace = true
-edition.workspace = true
+name = "pool"
+version = "0.1.0"
+edition = "2024_07"
 
 # See more keys and their definitions at https://docs.swmansion.com/scarb/docs/reference/manifest.html
 
 [dependencies]
 garaga = { git = "https://github.com/keep-starknet-strange/garaga.git", tag = "v0.15.3" }
 openzeppelin = "0.20.0"
-starknet.workspace = true
+starknet = "2.9.1"
 
 [dev-dependencies]
-snforge_std.workspace = true
-assert_macros.workspace = true
+snforge_std = "0.35.1"
+assert_macros = "2.9.1"
+
+[cairo]
+sierra-replace-ids = false
 
 [[target.starknet-contract]]
 sierra = true
+casm = true
 build-external-contracts = ["openzeppelin_presets::erc20::ERC20Upgradeable"]
 
 [scripts]

@@ -4,3 +4,14 @@ version.workspace = true
 edition.workspace = true
 
 [dependencies]
+cainome.workspace = true
+futures.workspace = true
+lazy_static.workspace = true
+num-bigint.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+starknet.workspace = true
+starknet-crypto.workspace = true
+starknet-types-core.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
