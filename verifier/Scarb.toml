@@ -9,7 +9,3 @@ starknet.workspace = true
 
 [dev-dependencies]
 cairo_test.workspace = true
-
-[[target.starknet-contract]]
-casm = true
-casm-add-pythonic-hints = true
