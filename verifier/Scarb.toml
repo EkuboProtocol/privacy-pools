@@ -1,0 +1,15 @@
+[package]
+name = "verifier"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+garaga.workspace = true
+starknet.workspace = true
+
+[dev-dependencies]
+cairo_test.workspace = true
+
+[[target.starknet-contract]]
+casm = true
+casm-add-pythonic-hints = true
