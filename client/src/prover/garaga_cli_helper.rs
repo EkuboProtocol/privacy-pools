@@ -34,8 +34,6 @@ impl GaragaCliHelper {
     }
     pub fn save_input(&self, input: CircuitInput) {
         let path = self.witness_dir().join(&self.input_path);
-        println!("path: {:?}", path);
-        let path = PathBuf::from_str("../target/withdraw_js/input_generated.json").unwrap();
         std::fs::File::create(path)
             .unwrap()
             .write_all(serde_json::to_string_pretty(&input).unwrap().as_bytes())
@@ -46,10 +44,10 @@ impl GaragaCliHelper {
     }
     pub fn generate_witness(&self) {
         let output = Command::new("node")
-            .arg("./target/withdraw_js/generate_witness.js")
-            .arg("./target/withdraw_js/withdraw.wasm")
-            .arg("./target/withdraw_js/input_generated.json")
-            .arg("./target/withdraw_js/withdraw.wtns")
+            .arg("../target/withdraw_js/generate_witness.js")
+            .arg("../target/withdraw_js/withdraw.wasm")
+            .arg("../target/withdraw_js/input_generated.json")
+            .arg("../target/withdraw_js/withdraw.wtns")
             .output()
             .unwrap();
         assert!(output.status.success());
@@ -62,8 +60,8 @@ impl GaragaCliHelper {
             .arg("snarkjs")
             .arg("groth16")
             .arg("prove")
-            .arg(format!("{}_0001.zkey", self.circuit_name))
-            .arg(format!("{}_js/witness.wtns", self.circuit_name))
+            .arg(format!("../target/{}_0001.zkey", self.circuit_name))
+            .arg(format!("../target/{}_js/withdraw.wtns", self.circuit_name))
             .arg(&self.proof_path)
             .arg(&self.public_inputs_path)
             .current_dir(&self.dir)
@@ -78,18 +76,14 @@ impl GaragaCliHelper {
         self.dir.join(format!("{}_js", self.circuit_name))
     }
     fn run_calldata_command(&self) -> Output {
-        println!("vk_path: {:?}", &self.vk_path);
-        println!("proof_path: {:?}", &self.proof_path);
-        println!("public_inputs_path: {:?}", &self.public_inputs_path);
-        println!("dir: {:?}", &self.dir);
         let output = Command::new("garaga")
             .arg("calldata")
             .arg("--vk")
             .arg(&self.vk_path)
             .arg("--proof")
-            .arg(&self.proof_path)
+            .arg(PathBuf::new().join("../target").join(&self.proof_path))
             .arg("--public-inputs")
-            .arg(&self.public_inputs_path)
+            .arg(PathBuf::new().join("../target").join(&self.public_inputs_path))
             .arg("--system")
             .arg("groth16")
             .current_dir(&self.dir)

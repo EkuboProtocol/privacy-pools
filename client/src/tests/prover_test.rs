@@ -8,7 +8,7 @@ use crate::{
 use cainome::cairo_serde::U256;
 
 #[tokio::test]
-async fn test_prover() {
+async fn test_prover_basic() {
     let my_commitment = Commitment::new(12345u32, 54321u32, 100u32);
 
     let commitments = vec![

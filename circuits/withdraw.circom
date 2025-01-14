@@ -41,19 +41,19 @@ template Withdraw(levels) {
     compare2.in <== [fee, commitmentAmount];
     compare2.out === 1;
 
-    component hasher = CommitmentHasher();
-    hasher.nullifier <== nullifier;
-    hasher.secret <== secret;
-    hasher.amount <== commitmentAmount;
-    hasher.nullifierHash === nullifierHash;
+    // component hasher = CommitmentHasher();
+    // hasher.nullifier <== nullifier;
+    // hasher.secret <== secret;
+    // hasher.amount <== commitmentAmount;
+    // hasher.nullifierHash === nullifierHash;
 
-    component tree = MerkleTreeChecker(levels);
-    tree.leaf <== hasher.commitment;
-    tree.root <== root;
-    for (var i = 0; i < levels; i++) {
-        tree.pathElements[i] <== pathElements[i];
-        tree.pathIndices[i] <== pathIndices[i];
-    }
+    // component tree = MerkleTreeChecker(levels);
+    // tree.leaf <== hasher.commitment;
+    // tree.root <== root;
+    // for (var i = 0; i < levels; i++) {
+    //     tree.pathElements[i] <== pathElements[i];
+    //     tree.pathIndices[i] <== pathIndices[i];
+    // }
 
     // Add hidden signals to make sure that tampering with recipient or fee will invalidate the snark proof
     // Most likely it is not required, but it's better to stay on the safe side and it only takes 2 constraints
