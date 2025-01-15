@@ -62,5 +62,3 @@ template Withdraw(levels) {
     recipientSquare <== recipient * recipient;
     feeSquare <== fee * fee;
 }
-
-component main {public [root, nullifierHash, recipient, fee, amount, refundCommitmentHash]} = Withdraw(5);
