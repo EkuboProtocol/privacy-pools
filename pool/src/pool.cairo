@@ -12,7 +12,6 @@ struct PublicOutput {
     root: u256,
     nullifierHash: u256,
     recipient: ContractAddress,
-    relayer: u256,
     fee: u256,
     refundCommitmentHash: u256,
     amount: u256,
@@ -26,10 +25,9 @@ impl PublicOutputImpl of PublicOutputTrait {
             root: *span[0],
             nullifierHash: *span[1],
             recipient: recipient.try_into().unwrap(),
-            relayer: *span[3],
-            fee: *span[4],
-            refundCommitmentHash: *span[5],
-            amount: *span[6],
+            fee: *span[3],
+            refundCommitmentHash: *span[4],
+            amount: *span[5],
         }
     }
 }
