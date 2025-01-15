@@ -51,6 +51,12 @@ mod Pool {
 
     component!(path: MerkleTreeComponent, storage: merkle, event: MerkleEvent);
 
+    pub mod Errors {
+        pub const INVALID_PROOF: felt252 = 'Pool: invalid proof';
+        pub const NULLIFIER_ALREADY_USED: felt252 = 'Pool: nullifier already used';
+        pub const ROOT_MISMATCH: felt252 = 'Pool: root mismatch';
+        pub const INSUFFICIENT_FEE: felt252 = 'Pool: insufficient fee';
+    }
 
     #[storage]
     struct Storage {
@@ -63,9 +69,30 @@ mod Pool {
     }
 
     #[event]
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     enum Event {
         MerkleEvent: MerkleTreeComponent::Event,
+        Deposit: Deposit,
+        Withdraw: Withdraw,
+    }
+
+    #[derive(Drop, PartialEq, starknet::Event)]
+    pub struct Deposit {
+        #[key]
+        pub from: ContractAddress,
+        #[key]
+        pub secret_and_nullifier_hash: u256,
+        pub amount: u256,
+    }
+
+    #[derive(Drop, PartialEq, starknet::Event)]
+    pub struct Withdraw {
+        #[key]
+        pub nullifier_hash: u256,
+        #[key]
+        pub to: ContractAddress,
+        pub amount: u256,
+        pub setHash: u256,
     }
 
     #[constructor]
@@ -91,6 +118,8 @@ mod Pool {
             let caller = get_caller_address();
             let this = get_contract_address();
             self.transfer_token.read().transfer_from(caller, this, amount.into());
+
+            self.emit(Deposit { from: caller, secret_and_nullifier_hash, amount });
             true
         }
 
@@ -101,18 +130,18 @@ mod Pool {
                 contract_address: verifier_address,
             }
                 .verify_groth16_proof_bn254(proof)
-                .expect('proof-is-valid');
+                .expect(Errors::INVALID_PROOF);
             let public_output = PublicOutputImpl::from_u256_span(public_output);
             assert(
                 self.nullifier_hashes.read(public_output.nullifierHash) == false,
-                'nullifier-is-zero',
+                Errors::NULLIFIER_ALREADY_USED,
             );
             self.nullifier_hashes.entry(public_output.nullifierHash).write(true);
 
-            assert(self.merkle.roots.read(public_output.root) == true, 'roots-must-match');
+            assert(self.merkle.roots.read(public_output.root) == true, Errors::ROOT_MISMATCH);
 
             let min_fee: u256 = self.min_fee.read().into();
-            assert(min_fee <= public_output.fee.into(), 'insufficient-fee');
+            assert(min_fee <= public_output.fee.into(), Errors::INSUFFICIENT_FEE);
 
             self
                 .transfer_token
@@ -123,6 +152,15 @@ mod Pool {
 
             self.merkle.add_leaf(public_output.refundCommitmentHash);
 
+            self
+                .emit(
+                    Withdraw {
+                        nullifier_hash: public_output.nullifierHash,
+                        to: public_output.recipient,
+                        amount: public_output.amount,
+                        setHash: 0,
+                    },
+                );
             true
         }
         fn current_root(self: @ContractState) -> u256 {

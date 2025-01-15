@@ -19,7 +19,7 @@ pub mod MerkleTreeComponent {
     }
 
     #[event]
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     pub enum Event {}
 
     #[generate_trait]

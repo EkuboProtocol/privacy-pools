@@ -171,7 +171,7 @@ async fn test_contract_withdraw_nullifier() {
         }),
     ))) = result
     {
-        assert!(execution_error.contains("('nullifier-is-zero')"))
+        assert!(execution_error.contains("('Pool: nullifier already used')"))
     } else {
         panic!("Multiple withdraw should faile because of nullifier")
     }
@@ -309,7 +309,7 @@ async fn test_contract_withdraw_refund() {
 }
 
 #[tokio::test]
-#[should_panic(expected = "insufficient-fee")]
+#[should_panic(expected = "Pool: insufficient fee")]
 async fn test_contract_withdraw_insufficient_fee_panic() {
     let runner = KatanaRunner::load();
     let prefunded_account = runner.prefunded_account();
@@ -396,7 +396,7 @@ async fn test_contract_withdraw_insufficient_fee_panic() {
 }
 
 #[tokio::test]
-#[should_panic(expected = "roots-must-match")]
+#[should_panic(expected = "Pool: root mismatch")]
 async fn test_contract_withdraw_wrong_root_panic() {
     let runner = KatanaRunner::load();
     let prefunded_account = runner.prefunded_account();
