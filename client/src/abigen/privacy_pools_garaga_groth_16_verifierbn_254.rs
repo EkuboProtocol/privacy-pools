@@ -143,6 +143,7 @@ impl<P: starknet::providers::Provider + Sync> PrivacyPoolsGaragaGroth16verifierb
         __calldata.extend(Vec::<starknet::core::types::Felt>::cairo_serialize(
             full_proof_with_hints,
         ));
+        dbg!(self.address);
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!("verify_groth16_proof_bn254"),

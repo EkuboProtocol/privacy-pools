@@ -1,4 +1,4 @@
 python 3.10.16
 nodejs 23.5.0
-scarb 2.9.1
+scarb 2.8.5
 starknet-foundry 0.35.1

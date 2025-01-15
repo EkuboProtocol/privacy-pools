@@ -48,8 +48,6 @@ async fn test_verifier() {
         )
         .await;
 
-    dbg!(&proof);
-
     let result = verifier
         .verify_groth16_proof_bn254(&proof)
         .call()
