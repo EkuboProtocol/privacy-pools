@@ -56,7 +56,7 @@ async fn test_verifier() {
         .unwrap();
 
     assert_eq!(
-        vec!["185790836", "108644", "11", "13", "12", "0", "42"]
+        vec!["185790836", "108644", "11", "12", "0", "42"]
             .into_iter()
             .map(|f| U256::from_str(f).unwrap())
             .collect::<Vec<_>>(),

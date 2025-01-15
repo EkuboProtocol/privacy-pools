@@ -14,7 +14,6 @@ pub struct CircuitInput {
     pub root: U256,
     pub nullifier_hash: U256,
     pub recipient: U256,
-    pub relayer: U256,
     pub fee: U256,
     pub refund: U256,
     pub refund_commitment_hash: U256,
@@ -30,7 +29,6 @@ pub struct CircuitInput {
 pub struct CircuitInputCreator {
     pub commitment: Commitment,
     pub recipient: Felt,
-    pub relayer: Felt,
     pub fee: U256,
     pub merkle_tree: MerkleTree,
 }
@@ -75,7 +73,6 @@ impl CircuitInputCreator {
         Self {
             commitment,
             recipient: recipient.into(),
-            relayer: Felt::from(13),
             fee: fee.into(),
             merkle_tree: tree,
         }
@@ -93,7 +90,6 @@ impl CircuitInputCreator {
             root: self.merkle_tree.root(),
             nullifier_hash: self.commitment.nullifier_hash(),
             recipient: U256::from_str(&self.recipient.to_string()).unwrap(),
-            relayer: U256::from_str(&self.relayer.to_string()).unwrap(),
             fee: self.fee,
             refund: refund_amount,
             refund_commitment_hash: refund_commitment.map_or(U256::ZERO, Commitment::hash),
