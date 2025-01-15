@@ -8,11 +8,11 @@ edition = "2024_07"
 [dependencies]
 garaga = { git = "https://github.com/keep-starknet-strange/garaga.git", tag = "v0.14.0" }
 openzeppelin = "0.16.0"
-starknet = "2.8.5"
+starknet = "2.8.2"
 
 [dev-dependencies]
 snforge_std = "0.35.1"
-assert_macros = "2.8.5"
+assert_macros = "2.8.2"
 
 [cairo]
 sierra-replace-ids = false

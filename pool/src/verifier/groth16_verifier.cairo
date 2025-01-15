@@ -19,7 +19,6 @@ mod Groth16VerifierBN254 {
 
     const ECIP_OPS_CLASS_HASH: felt252 =
         0x26ab709dc875b607ce36aaa1d2a7f60d574018f7e9e1283eb3faba865363709;
-    use starknet::ContractAddress;
 
     #[storage]
     struct Storage {}

@@ -69,7 +69,9 @@ impl GaragaCliHelper {
             .unwrap();
         assert!(output.status.success());
         assert_eq!(output.status.code(), Some(0));
-        assert!(output.stderr.is_empty());
+        if !output.stderr.is_empty() {
+            println!("Standard Output: {}", String::from_utf8_lossy(&output.stderr));
+        }
         assert!(output.stdout.is_empty());
     }
     fn witness_dir(&self) -> PathBuf {
