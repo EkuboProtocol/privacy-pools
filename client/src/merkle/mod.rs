@@ -8,7 +8,7 @@ use cainome::cairo_serde::U256;
 
 pub use hybrid_merkle_tree::HybridMerkleTree as MerkleTree;
 
-pub const CONTRACT_MERKLE_TREE_HEIGHT: usize = 6;
+pub const CONTRACT_MERKLE_TREE_HEIGHT: usize = 33;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct MerklePath {
