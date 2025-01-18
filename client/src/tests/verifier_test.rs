@@ -55,11 +55,9 @@ async fn test_verifier() {
         .unwrap()
         .unwrap();
 
-    assert_eq!(
-        vec!["185790836", "108644", "11", "12", "0", "42"]
-            .into_iter()
-            .map(|f| U256::from_str(f).unwrap())
-            .collect::<Vec<_>>(),
-        result
-    );
+    // The first two results are hashes and are tested elsewhere
+    assert_eq!(result[2], 11u32.into());
+    assert_eq!(result[3], 12u32.into());
+    assert_eq!(result[4], 0u32.into());
+    assert_eq!(result[5], 42u32.into());
 }

@@ -57,7 +57,7 @@ impl GaragaCliHelper {
     }
     pub fn run_prove(&self) {
         let output = Command::new("npx")
-            .arg("snarkjs")
+            .arg("snarkjs@latest")
             .arg("groth16")
             .arg("prove")
             .arg(format!("../target/{}_0001.zkey", self.circuit_name))
@@ -91,6 +91,9 @@ impl GaragaCliHelper {
             .current_dir(&self.dir)
             .output()
             .unwrap();
+        if !output.stderr.is_empty() {
+            println!("Standard Output: {}", String::from_utf8_lossy(&output.stderr));
+        }
         assert!(output.status.success());
         assert_eq!(output.status.code(), Some(0));
         output

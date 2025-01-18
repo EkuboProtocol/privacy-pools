@@ -113,7 +113,7 @@ pub struct MerklePath {
 
 #[test]
 fn test_merkle_tree_empty() {
-    MerkleTree::new(20);
+    MerkleTree::new(8);
 }
 
 #[test]

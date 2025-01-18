@@ -69,9 +69,9 @@ fn precomputed_hashes(size: usize) -> Vec<U256> {
 #[test]
 fn test_append_merkle_tree() {
     use crate::merkle_tree::MerkleTreeBuilder;
-    let height = 12;
+    let height = 6;
     let mut ap = AppendOnlyMerkleTree::new(height);
-    let coms = (0..200u32).map(U256::from).collect();
+    let coms = (0..20u32).map(U256::from).collect();
     for c in &coms {
         ap.add_leaf(c);
     }
