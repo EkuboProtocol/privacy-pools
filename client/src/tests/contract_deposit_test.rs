@@ -1,7 +1,7 @@
 use crate::{
     abigen::privacy_pools_garaga_pool::{PrivacyPoolsGaragaPool, PrivacyPoolsGaragaPoolReader},
     circuit::Commitment,
-    merkle_tree::{MerkleTree, MerkleTreeBuilder},
+    merkle::{MerkleTree, MerkleTreeBuilder},
     testnet::runner::KatanaRunner,
     tests::{approve_helper, single_deploy_helper, DeployHelperResult},
     transaction_waiter::TransactionWaiter,

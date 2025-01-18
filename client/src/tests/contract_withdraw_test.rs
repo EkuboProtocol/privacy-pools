@@ -1,7 +1,7 @@
 use crate::{
     abigen::{privacy_pools_garaga_pool::PrivacyPoolsGaragaPool, Erc20Reader},
     circuit::{CircuitInputCreator, Commitment},
-    merkle_tree::MerkleTreeBuilder,
+    merkle::MerkleTreeBuilder,
     prover::Prover,
     testnet::runner::KatanaRunner,
     tests::{

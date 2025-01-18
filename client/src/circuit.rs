@@ -6,7 +6,7 @@ use cainome::cairo_serde::U256;
 use serde::{Deserialize, Serialize};
 use starknet_crypto::Felt;
 
-use crate::merkle_tree::MerkleTree;
+use crate::merkle::MerkleTree;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]

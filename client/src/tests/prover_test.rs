@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use crate::{
     circuit::{CircuitInputCreator, Commitment},
-    merkle_tree::MerkleTreeBuilder,
+    merkle::MerkleTreeBuilder,
     prover::Prover,
 };
 use cainome::cairo_serde::U256;

@@ -4,7 +4,7 @@ use crate::{
     abigen::privacy_pools_garaga_groth_16_verifierbn_254::PrivacyPoolsGaragaGroth16verifierbn254Reader,
     circuit::{CircuitInputCreator, Commitment},
     deploy_declare::PoolContractDeployer,
-    merkle_tree::MerkleTreeBuilder,
+    merkle::MerkleTreeBuilder,
     prover::Prover,
     testnet::runner::KatanaRunner,
 };
