@@ -70,7 +70,10 @@ impl GaragaCliHelper {
         assert!(output.status.success());
         assert_eq!(output.status.code(), Some(0));
         if !output.stderr.is_empty() {
-            println!("Standard Output: {}", String::from_utf8_lossy(&output.stderr));
+            println!(
+                "Standard Output: {}",
+                String::from_utf8_lossy(&output.stderr)
+            );
         }
         assert!(output.stdout.is_empty());
     }
@@ -85,14 +88,21 @@ impl GaragaCliHelper {
             .arg("--proof")
             .arg(PathBuf::new().join("../target").join(&self.proof_path))
             .arg("--public-inputs")
-            .arg(PathBuf::new().join("../target").join(&self.public_inputs_path))
+            .arg(
+                PathBuf::new()
+                    .join("../target")
+                    .join(&self.public_inputs_path),
+            )
             .arg("--system")
             .arg("groth16")
             .current_dir(&self.dir)
             .output()
             .unwrap();
         if !output.stderr.is_empty() {
-            println!("Standard Output: {}", String::from_utf8_lossy(&output.stderr));
+            println!(
+                "Standard Output: {}",
+                String::from_utf8_lossy(&output.stderr)
+            );
         }
         assert!(output.status.success());
         assert_eq!(output.status.code(), Some(0));

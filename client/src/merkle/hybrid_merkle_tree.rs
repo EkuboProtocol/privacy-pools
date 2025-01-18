@@ -2,7 +2,10 @@ use cainome::cairo_serde::U256;
 
 use crate::hash::hash;
 
-use super::{precomputed_hashes, MerklePath, CONTRACT_MERKLE_TREE_HEIGHT};
+use super::{
+    precomputed_hashes, FindLeafMerkleTree, MerklePath, PathMerkleTree, RootMerkleTree,
+    CONTRACT_MERKLE_TREE_HEIGHT,
+};
 
 #[derive(Debug, Clone)]
 pub struct HybridMerkleTree {
@@ -13,8 +16,8 @@ pub struct HybridMerkleTree {
     free_index: usize,
 }
 
-impl HybridMerkleTree {
-    pub fn new(height: usize) -> Self {
+impl RootMerkleTree for HybridMerkleTree {
+    fn new(height: usize) -> Self {
         let precomputed = precomputed_hashes(height);
 
         HybridMerkleTree {
@@ -26,7 +29,7 @@ impl HybridMerkleTree {
         }
     }
 
-    pub fn add_leaf(&mut self, leaf: &U256) {
+    fn add_leaf(&mut self, leaf: &U256) {
         let mut hash_ = *leaf;
         let mut index = self.free_index;
         self.free_index += 1;
@@ -50,7 +53,13 @@ impl HybridMerkleTree {
 
         self.left_path[self.height - 1] = hash_;
     }
-    pub fn path(&self, mut index: usize) -> MerklePath {
+    fn root(&self) -> U256 {
+        self.left_path[self.height - 1]
+    }
+}
+
+impl PathMerkleTree for HybridMerkleTree {
+    fn path(&self, mut index: usize) -> MerklePath {
         if index >= self.layers[0].len() {
             panic!("Leaf does not exist!")
         }
@@ -71,19 +80,16 @@ impl HybridMerkleTree {
         }
         MerklePath { elements, indices }
     }
-    pub fn path_leaf(&self, leaf: U256) -> MerklePath {
-        self.path(
-            self.layers[0]
-                .iter()
-                .enumerate()
-                .filter(|(_, f)| **f == leaf)
-                .map(|(i, _)| i)
-                .next()
-                .unwrap(),
-        )
-    }
-    pub fn root(&self) -> U256 {
-        self.left_path[self.height - 1]
+}
+
+impl FindLeafMerkleTree for HybridMerkleTree {
+    fn find_leaf_index(&self, leaf: &U256) -> Option<usize> {
+        self.layers[0]
+            .iter()
+            .enumerate()
+            .filter(|(_, f)| *f == leaf)
+            .map(|(i, _)| i)
+            .next()
     }
 }
 
@@ -117,27 +123,27 @@ impl HybridMerkleTreeBuilder {
 
 #[test]
 fn test_hybrid_merkle_tree_simple() {
-    use super::dumb_merkle_tree::MerkleTreeBuilder;
+    use super::dumb_merkle_tree::DumbMerkleTree;
     let height = 6;
     let mut hybrid = HybridMerkleTree::new(height);
     let coms = (0..20u32).map(U256::from).collect();
     for c in &coms {
         hybrid.add_leaf(c);
     }
-    let tree = MerkleTreeBuilder::with_leafs(height, coms).build();
+    let tree = DumbMerkleTree::with_leafs(height, coms);
     assert_eq!(tree.root(), hybrid.root())
 }
 
 #[test]
 fn test_hybrid_merkle_tree_path() {
-    use super::dumb_merkle_tree::MerkleTreeBuilder;
+    use super::dumb_merkle_tree::DumbMerkleTree;
     let height = 6;
     let mut hybrid = HybridMerkleTree::new(height);
     let coms = (0..20u32).map(U256::from).collect();
     for c in &coms {
         hybrid.add_leaf(c);
     }
-    let tree = MerkleTreeBuilder::with_leafs(height, coms).build();
+    let tree = DumbMerkleTree::with_leafs(height, coms);
     assert_eq!(tree.path(0), hybrid.path(0));
     assert_eq!(tree.path(1), hybrid.path(1));
     assert_eq!(tree.path(2), hybrid.path(2));
@@ -154,12 +160,12 @@ fn test_hybrid_merkle_tree_large() {
     let height = 32;
     let mut hybrid = HybridMerkleTree::new(height);
     let mut append = AppendOnlyMerkleTree::new(height);
-    
+
     let coms: Vec<_> = (0..3u32).map(U256::from).collect();
     for c in &coms {
         hybrid.add_leaf(c);
         append.add_leaf(c);
     }
-    
+
     assert_eq!(hybrid.root(), append.root());
 }

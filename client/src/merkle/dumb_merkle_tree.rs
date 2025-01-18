@@ -1,63 +1,36 @@
 use crate::hash::hash;
 use cainome::cairo_serde::U256;
 
-use super::{MerklePath, CONTRACT_MERKLE_TREE_HEIGHT};
+use super::{FindLeafMerkleTree, MerklePath, PathMerkleTree, RootMerkleTree};
 
 #[derive(Debug, Clone)]
-pub struct MerkleTreeBuilder {
-    height: usize,
-    leafs: Vec<U256>,
-}
-
-impl MerkleTreeBuilder {
-    pub fn new(height: usize) -> Self {
-        Self::with_leafs(height, vec![])
-    }
-    pub fn new_with_contract_height() -> Self {
-        Self::new(CONTRACT_MERKLE_TREE_HEIGHT)
-    }
-    pub fn with_leafs(height: usize, leafs: Vec<U256>) -> Self {
-        Self { height, leafs }
-    }
-    pub fn contract_height_with_leafs(leafs: Vec<U256>) -> Self {
-        Self::with_leafs(CONTRACT_MERKLE_TREE_HEIGHT, leafs)
-    }
-    pub fn build(&self) -> MerkleTree {
-        let desired_len = MerkleTree::len_for_height(self.height);
-        let len = self.leafs.len();
-        let mut leafs = self.leafs.clone();
-        leafs.extend(vec![U256::ZERO; desired_len - len]);
-
-        MerkleTree::with_leafs(self.height, leafs).unwrap()
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct MerkleTree {
+pub struct DumbMerkleTree {
     height: usize,
     layers: Vec<Vec<U256>>,
+    free_index: usize,
 }
 
-impl MerkleTree {
-    pub fn new(height: usize) -> Self {
-        Self::with_leafs(height, vec![U256::ZERO; Self::len_for_height(height)]).unwrap()
-    }
-    pub fn new_with_contract_height() -> Self {
-        Self::new(CONTRACT_MERKLE_TREE_HEIGHT)
-    }
-    pub fn with_leafs(height: usize, leafs: Vec<U256>) -> Option<Self> {
-        if Self::len_for_height(height) != leafs.len() {
-            return None;
-        }
+impl DumbMerkleTree {
+    pub fn with_leafs(height: usize, leafs: Vec<U256>) -> Self {
+        let free_index = leafs.len();
+        let desired_len = DumbMerkleTree::len_for_height(height);
+        let len = leafs.len();
+        let mut leafs = leafs.clone();
+        leafs.extend(vec![U256::ZERO; desired_len - len]);
+
         let mut len = leafs.len() / 2;
         let mut layers = vec![leafs];
         for _ in 1..height {
             layers.push(vec![U256::from(0u32); len]);
             len /= 2
         }
-        let mut result = MerkleTree { height, layers };
+        let mut result = DumbMerkleTree {
+            height,
+            layers,
+            free_index,
+        };
         result.recompute_layers();
-        Some(result)
+        result
     }
 
     fn recompute_layers(&mut self) {
@@ -69,10 +42,26 @@ impl MerkleTree {
             len /= 2;
         }
     }
-    pub fn root(&self) -> U256 {
+    fn len_for_height(height: usize) -> usize {
+        2usize.pow((height - 1).try_into().ok().unwrap())
+    }
+}
+
+impl RootMerkleTree for DumbMerkleTree {
+    fn new(height: usize) -> Self {
+        Self::with_leafs(height, vec![])
+    }
+    fn root(&self) -> U256 {
         self.layers[self.height - 1][0]
     }
-    pub fn path(&self, mut index: usize) -> MerklePath {
+    fn add_leaf(&mut self, leaf: &U256) {
+        self.layers[0][self.free_index] = *leaf;
+        self.free_index += 1;
+        self.recompute_layers();
+    }
+}
+impl PathMerkleTree for DumbMerkleTree {
+    fn path(&self, mut index: usize) -> MerklePath {
         let mut elements = vec![];
         let mut indices = vec![];
         for i in 0..self.height - 1 {
@@ -88,47 +77,40 @@ impl MerkleTree {
         }
         MerklePath { elements, indices }
     }
-    pub fn path_leaf(&self, leaf: U256) -> MerklePath {
-        self.path(
-            self.layers[0]
-                .iter()
-                .enumerate()
-                .filter(|(_, f)| **f == leaf)
-                .map(|(i, _)| i)
-                .next()
-                .unwrap(),
-        )
-    }
-    fn len_for_height(height: usize) -> usize {
-        2usize.pow((height - 1).try_into().ok().unwrap())
+}
+
+impl FindLeafMerkleTree for DumbMerkleTree {
+    fn find_leaf_index(&self, leaf: &U256) -> Option<usize> {
+        self.layers[0]
+            .iter()
+            .enumerate()
+            .filter(|(_, f)| *f == leaf)
+            .map(|(i, _)| i)
+            .next()
     }
 }
 
 #[test]
 fn test_merkle_tree_empty() {
-    MerkleTree::new(8);
+    DumbMerkleTree::new(8);
 }
 
 #[test]
 fn test_merkle_tree_simple() {
     assert_eq!(
         U256::from(45u32),
-        MerkleTree::with_leafs(1, vec![U256::from(45u32)])
-            .unwrap()
-            .root()
+        DumbMerkleTree::with_leafs(1, vec![U256::from(45u32)]).root()
     );
     assert_eq!(
         hash(U256::from(45u32), U256::from(47u32)),
-        MerkleTree::with_leafs(2, vec![U256::from(45u32), U256::from(47u32)])
-            .unwrap()
-            .root()
+        DumbMerkleTree::with_leafs(2, vec![U256::from(45u32), U256::from(47u32)]).root()
     );
     assert_eq!(
         hash(
             hash(U256::from(45u32), U256::from(47u32)),
             hash(U256::from(49u32), U256::from(50u32))
         ),
-        MerkleTree::with_leafs(
+        DumbMerkleTree::with_leafs(
             3,
             vec![
                 U256::from(45u32),
@@ -137,7 +119,6 @@ fn test_merkle_tree_simple() {
                 U256::from(50u32)
             ]
         )
-        .unwrap()
         .root()
     )
 }
@@ -149,20 +130,18 @@ fn test_merkle_tree_path() {
             elements: vec![U256::from(45u32)],
             indices: vec![false]
         },
-        MerkleTree::with_leafs(2, vec![U256::from(43u32), U256::from(45u32)])
-            .unwrap()
-            .path(0)
+        DumbMerkleTree::with_leafs(2, vec![U256::from(43u32), U256::from(45u32)]).path(0)
     );
     assert_eq!(
         MerklePath {
             elements: vec![U256::from(43u32)],
             indices: vec![true]
         },
-        MerkleTree::with_leafs(2, vec![U256::from(43u32), U256::from(45u32)])
+        DumbMerkleTree::with_leafs(2, vec![U256::from(43u32), U256::from(45u32)])
+            .find_path(&U256::from(45u32))
             .unwrap()
-            .path_leaf(U256::from(45u32))
     );
-    let tree = MerkleTree::with_leafs(
+    let tree = DumbMerkleTree::with_leafs(
         3,
         vec![
             U256::from(45u32),
@@ -170,8 +149,7 @@ fn test_merkle_tree_path() {
             U256::from(49u32),
             U256::from(50u32),
         ],
-    )
-    .unwrap();
+    );
     assert_eq!(
         MerklePath {
             elements: vec![
@@ -180,6 +158,6 @@ fn test_merkle_tree_path() {
             ],
             indices: vec![true, false]
         },
-        tree.path_leaf(U256::from(47u32))
+        tree.find_path(&U256::from(47u32)).unwrap()
     )
 }

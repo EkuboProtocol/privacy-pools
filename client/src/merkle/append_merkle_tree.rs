@@ -2,7 +2,7 @@ use cainome::cairo_serde::U256;
 
 use crate::hash::hash;
 
-use super::precomputed_hashes;
+use super::{precomputed_hashes, RootMerkleTree};
 
 #[derive(Debug)]
 pub struct AppendOnlyMerkleTree {
@@ -12,19 +12,19 @@ pub struct AppendOnlyMerkleTree {
     left_path: Vec<U256>,
 }
 
-impl AppendOnlyMerkleTree {
-    pub fn new(height: usize) -> Self {
+impl RootMerkleTree for AppendOnlyMerkleTree {
+    fn new(height: usize) -> Self {
         let precomputed = precomputed_hashes(height);
 
         AppendOnlyMerkleTree {
             free_leaf_index: 0,
             height,
-            left_path: precomputed.clone(), 
+            left_path: precomputed.clone(),
             precomputed,
         }
     }
 
-    pub fn add_leaf(&mut self, leaf: &U256) {
+    fn add_leaf(&mut self, leaf: &U256) {
         let mut hash_ = *leaf;
         let mut index = self.free_leaf_index;
 
@@ -45,20 +45,21 @@ impl AppendOnlyMerkleTree {
 
         self.left_path[self.height - 1] = hash_;
     }
-    pub fn root(&self) -> U256 {
+
+    fn root(&self) -> U256 {
         self.left_path[self.height - 1]
     }
 }
 
 #[test]
 fn test_append_merkle_tree() {
-    use super::dumb_merkle_tree::MerkleTreeBuilder;
+    use super::dumb_merkle_tree::DumbMerkleTree;
     let height = 6;
     let mut ap = AppendOnlyMerkleTree::new(height);
     let coms = (0..20u32).map(U256::from).collect();
     for c in &coms {
         ap.add_leaf(c);
     }
-    let tree = MerkleTreeBuilder::with_leafs(height, coms).build();
+    let tree = DumbMerkleTree::with_leafs(height, coms);
     assert_eq!(tree.root(), ap.root())
 }
