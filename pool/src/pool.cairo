@@ -79,7 +79,7 @@ mod Pool {
         self
             .verifier_contract
             .write(IGroth16VerifierBN254Dispatcher { contract_address: verifier_contract });
-        self.merkle.initializer(33);
+        self.merkle.initializer();
         self.min_fee.write(min_fee);
     }
 

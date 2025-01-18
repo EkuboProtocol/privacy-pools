@@ -72,3 +72,13 @@ fn precomputed_hashes(size: usize) -> Vec<U256> {
 
     arr
 }
+
+#[test] 
+fn test_generate_cairo_precomputed() {
+    let mut result = "\tlet mut arr = array![\n".to_string();
+    for h in precomputed_hashes(33) {
+        result += &format!("\t\t{},\n", h.to_string());
+    }
+    result += "\t];\n";
+    println!("{result}");
+}
