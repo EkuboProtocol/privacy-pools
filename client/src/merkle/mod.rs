@@ -1,11 +1,11 @@
-pub mod append_merkle_tree;
-pub mod dumb_merkle_tree;
-pub mod hybrid_merkle_tree;
+mod append_merkle_tree;
+#[cfg(test)]
+mod dumb_merkle_tree;
+mod hybrid_merkle_tree;
 
 use crate::hash::hash;
 use cainome::cairo_serde::U256;
 
-// pub use merkle_tree::{MerkleTree, MerkleTreeBuilder};
 pub use hybrid_merkle_tree::HybridMerkleTree as MerkleTree;
 
 pub const CONTRACT_MERKLE_TREE_HEIGHT: usize = 6;
