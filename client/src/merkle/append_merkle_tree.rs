@@ -52,7 +52,7 @@ impl AppendOnlyMerkleTree {
 
 #[test]
 fn test_append_merkle_tree() {
-    use super::merkle_tree::MerkleTreeBuilder;
+    use super::dumb_merkle_tree::MerkleTreeBuilder;
     let height = 6;
     let mut ap = AppendOnlyMerkleTree::new(height);
     let coms = (0..20u32).map(U256::from).collect();

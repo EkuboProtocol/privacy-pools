@@ -117,7 +117,7 @@ impl HybridMerkleTreeBuilder {
 
 #[test]
 fn test_hybrid_merkle_tree_simple() {
-    use super::merkle_tree::MerkleTreeBuilder;
+    use super::dumb_merkle_tree::MerkleTreeBuilder;
     let height = 6;
     let mut hybrid = HybridMerkleTree::new(height);
     let coms = (0..20u32).map(U256::from).collect();
@@ -130,7 +130,7 @@ fn test_hybrid_merkle_tree_simple() {
 
 #[test]
 fn test_hybrid_merkle_tree_path() {
-    use super::merkle_tree::MerkleTreeBuilder;
+    use super::dumb_merkle_tree::MerkleTreeBuilder;
     let height = 6;
     let mut hybrid = HybridMerkleTree::new(height);
     let coms = (0..20u32).map(U256::from).collect();

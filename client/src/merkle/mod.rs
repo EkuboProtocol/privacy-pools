@@ -1,6 +1,6 @@
 pub mod append_merkle_tree;
 pub mod hybrid_merkle_tree;
-pub mod merkle_tree;
+pub mod dumb_merkle_tree;
 
 use cainome::cairo_serde::U256;
 use crate::hash::hash;
