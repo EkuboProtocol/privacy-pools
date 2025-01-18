@@ -1,7 +1,7 @@
 use crate::hash::hash;
 use cainome::cairo_serde::U256;
 
-pub const CONTRACT_MERKLE_TREE_HEIGHT: usize = 6;
+use super::{MerklePath, CONTRACT_MERKLE_TREE_HEIGHT};
 
 #[derive(Debug, Clone)]
 pub struct MerkleTreeBuilder {
@@ -102,13 +102,6 @@ impl MerkleTree {
     fn len_for_height(height: usize) -> usize {
         2usize.pow((height - 1).try_into().ok().unwrap())
     }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct MerklePath {
-    pub elements: Vec<U256>,
-    //element is right
-    pub indices: Vec<bool>,
 }
 
 #[test]

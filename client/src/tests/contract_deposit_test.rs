@@ -1,7 +1,7 @@
 use crate::{
     abigen::privacy_pools_garaga_pool::{PrivacyPoolsGaragaPool, PrivacyPoolsGaragaPoolReader},
     circuit::Commitment,
-    merkle::{MerkleTree, MerkleTreeBuilder},
+    merkle::MerkleTreeBuilder,
     testnet::runner::KatanaRunner,
     tests::{approve_helper, single_deploy_helper, DeployHelperResult},
     transaction_waiter::TransactionWaiter,
@@ -16,7 +16,10 @@ async fn test_contract_merkle_tree_empty() {
 
     let pool_reader = PrivacyPoolsGaragaPoolReader::new(helper.pool_address, runner.client());
     let contract_root = pool_reader.current_root().call().await.unwrap();
-    assert_eq!(MerkleTree::new_with_contract_height().root(), contract_root);
+    assert_eq!(
+        MerkleTreeBuilder::new_with_contract_height().build().root(),
+        contract_root
+    );
 }
 
 #[tokio::test]
