@@ -4,7 +4,7 @@ use crate::{
     abigen::privacy_pools_garaga_groth_16_verifierbn_254::PrivacyPoolsGaragaGroth16verifierbn254Reader,
     circuit::{CircuitInputCreator, Commitment},
     deploy_declare::PoolContractDeployer,
-    merkle::MerkleTreeBuilder,
+    merkle::{MerkleTree, RootMerkleTree},
     prover::Prover,
     testnet::runner::KatanaRunner,
 };
@@ -40,7 +40,7 @@ async fn test_verifier() {
         .get_calldata(
             CircuitInputCreator::new(
                 my_commitment.clone(),
-                MerkleTreeBuilder::contract_height_with_leafs(commitments).build(),
+                MerkleTree::contract_height_with_leafs(commitments),
                 11u32,
                 12u32,
             )

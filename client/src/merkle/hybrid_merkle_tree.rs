@@ -2,10 +2,7 @@ use cainome::cairo_serde::U256;
 
 use crate::hash::hash;
 
-use super::{
-    precomputed_hashes, FindLeafMerkleTree, MerklePath, PathMerkleTree, RootMerkleTree,
-    CONTRACT_MERKLE_TREE_HEIGHT,
-};
+use super::{precomputed_hashes, FindLeafMerkleTree, MerklePath, PathMerkleTree, RootMerkleTree};
 
 #[derive(Debug, Clone)]
 pub struct HybridMerkleTree {
@@ -90,34 +87,6 @@ impl FindLeafMerkleTree for HybridMerkleTree {
             .filter(|(_, f)| *f == leaf)
             .map(|(i, _)| i)
             .next()
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct HybridMerkleTreeBuilder {
-    height: usize,
-    leafs: Vec<U256>,
-}
-
-impl HybridMerkleTreeBuilder {
-    pub fn new(height: usize) -> Self {
-        Self::with_leafs(height, vec![])
-    }
-    pub fn new_with_contract_height() -> Self {
-        Self::new(CONTRACT_MERKLE_TREE_HEIGHT)
-    }
-    pub fn with_leafs(height: usize, leafs: Vec<U256>) -> Self {
-        Self { height, leafs }
-    }
-    pub fn contract_height_with_leafs(leafs: Vec<U256>) -> Self {
-        Self::with_leafs(CONTRACT_MERKLE_TREE_HEIGHT, leafs)
-    }
-    pub fn build(&self) -> HybridMerkleTree {
-        let mut tree = HybridMerkleTree::new(self.height);
-        for l in &self.leafs {
-            tree.add_leaf(l);
-        }
-        tree
     }
 }
 

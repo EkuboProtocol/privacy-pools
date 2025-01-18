@@ -6,9 +6,7 @@ use crate::hash::hash;
 use cainome::cairo_serde::U256;
 
 // pub use merkle_tree::{MerkleTree, MerkleTreeBuilder};
-pub use hybrid_merkle_tree::{
-    HybridMerkleTree as MerkleTree, HybridMerkleTreeBuilder as MerkleTreeBuilder,
-};
+pub use hybrid_merkle_tree::HybridMerkleTree as MerkleTree;
 
 pub const CONTRACT_MERKLE_TREE_HEIGHT: usize = 6;
 
@@ -31,6 +29,12 @@ pub trait RootMerkleTree {
         Self: Sized,
     {
         Self::new(CONTRACT_MERKLE_TREE_HEIGHT)
+    }
+    fn contract_height_with_leafs(leafs: Vec<U256>) -> Self
+    where
+        Self: Sized,
+    {
+        Self::with_leafs(CONTRACT_MERKLE_TREE_HEIGHT, leafs)
     }
     fn with_leafs(height: usize, leafs: Vec<U256>) -> Self
     where

@@ -1,7 +1,7 @@
 use crate::{
     abigen::privacy_pools_garaga_pool::{PrivacyPoolsGaragaPool, PrivacyPoolsGaragaPoolReader},
     circuit::Commitment,
-    merkle::{MerkleTreeBuilder, RootMerkleTree},
+    merkle::{MerkleTree, RootMerkleTree},
     testnet::runner::KatanaRunner,
     tests::{approve_helper, single_deploy_helper, DeployHelperResult},
     transaction_waiter::TransactionWaiter,
@@ -16,10 +16,7 @@ async fn test_contract_merkle_tree_empty() {
 
     let pool_reader = PrivacyPoolsGaragaPoolReader::new(helper.pool_address, runner.client());
     let contract_root = pool_reader.current_root().call().await.unwrap();
-    assert_eq!(
-        MerkleTreeBuilder::new_with_contract_height().build().root(),
-        contract_root
-    );
+    assert_eq!(MerkleTree::new_with_contract_height().root(), contract_root);
 }
 
 #[tokio::test]
@@ -49,7 +46,7 @@ async fn test_contract_merkle_tree_addition() {
         .await
         .unwrap();
 
-    let tree = MerkleTreeBuilder::contract_height_with_leafs(vec![commitment_1.hash()]).build();
+    let tree = MerkleTree::contract_height_with_leafs(vec![commitment_1.hash()]);
     assert_eq!(tree.root(), pool.current_root().call().await.unwrap());
 
     let commitment_2 = Commitment::new(222u32, 3u32, 200u32);
@@ -66,11 +63,8 @@ async fn test_contract_merkle_tree_addition() {
         .await
         .unwrap();
 
-    let tree = MerkleTreeBuilder::contract_height_with_leafs(vec![
-        commitment_1.hash(),
-        commitment_2.hash(),
-    ])
-    .build();
+    let tree =
+        MerkleTree::contract_height_with_leafs(vec![commitment_1.hash(), commitment_2.hash()]);
     assert_eq!(tree.root(), pool.current_root().call().await.unwrap());
 }
 
@@ -108,9 +102,7 @@ async fn test_contract_merkle_tree_multiple() {
         .await
         .unwrap();
 
-    let tree = MerkleTreeBuilder::contract_height_with_leafs(
-        commitments.iter().map(Commitment::hash).collect(),
-    )
-    .build();
+    let tree =
+        MerkleTree::contract_height_with_leafs(commitments.iter().map(Commitment::hash).collect());
     assert_eq!(tree.root(), pool.current_root().call().await.unwrap());
 }

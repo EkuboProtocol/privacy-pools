@@ -1,7 +1,7 @@
 use crate::{
     abigen::{privacy_pools_garaga_pool::PrivacyPoolsGaragaPool, Erc20Reader},
     circuit::{CircuitInputCreator, Commitment},
-    merkle::MerkleTreeBuilder,
+    merkle::{MerkleTree, RootMerkleTree},
     prover::Prover,
     testnet::runner::KatanaRunner,
     tests::{
@@ -68,10 +68,7 @@ async fn test_contract_withdraw_simple() {
 
     let input_creator = CircuitInputCreator::new(
         my_commitment.clone(),
-        MerkleTreeBuilder::contract_height_with_leafs(
-            commitments.iter().map(Commitment::hash).collect(),
-        )
-        .build(),
+        MerkleTree::contract_height_with_leafs(commitments.iter().map(Commitment::hash).collect()),
         runner.other_account_address(),
         2u32,
     );
@@ -145,10 +142,7 @@ async fn test_contract_withdraw_nullifier() {
 
     let input_creator = CircuitInputCreator::new(
         my_commitment.clone(),
-        MerkleTreeBuilder::contract_height_with_leafs(
-            commitments.iter().map(Commitment::hash).collect(),
-        )
-        .build(),
+        MerkleTree::contract_height_with_leafs(commitments.iter().map(Commitment::hash).collect()),
         999888555,
         2u32,
     );
@@ -228,10 +222,7 @@ async fn test_contract_withdraw_refund() {
 
     let input_creator = CircuitInputCreator::new(
         my_commitment.clone(),
-        MerkleTreeBuilder::contract_height_with_leafs(
-            commitments.iter().map(Commitment::hash).collect(),
-        )
-        .build(),
+        MerkleTree::contract_height_with_leafs(commitments.iter().map(Commitment::hash).collect()),
         runner.other_account_address(),
         2u32,
     );
@@ -272,10 +263,7 @@ async fn test_contract_withdraw_refund() {
 
     let input_creator = CircuitInputCreator::new(
         refund_commitment.clone(),
-        MerkleTreeBuilder::contract_height_with_leafs(
-            commitments.iter().map(Commitment::hash).collect(),
-        )
-        .build(),
+        MerkleTree::contract_height_with_leafs(commitments.iter().map(Commitment::hash).collect()),
         runner.other_account_2_address(),
         2u32,
     );
@@ -360,10 +348,7 @@ async fn test_contract_withdraw_insufficient_fee_panic() {
 
     let input_creator = CircuitInputCreator::new(
         my_commitment.clone(),
-        MerkleTreeBuilder::contract_height_with_leafs(
-            commitments.iter().map(Commitment::hash).collect(),
-        )
-        .build(),
+        MerkleTree::contract_height_with_leafs(commitments.iter().map(Commitment::hash).collect()),
         runner.other_account_address(),
         19u32,
     );
@@ -439,10 +424,7 @@ async fn test_contract_withdraw_wrong_root_panic() {
 
     let input_creator = CircuitInputCreator::new(
         my_commitment.clone(),
-        MerkleTreeBuilder::contract_height_with_leafs(
-            commitments.iter().map(Commitment::hash).collect(),
-        )
-        .build(),
+        MerkleTree::contract_height_with_leafs(commitments.iter().map(Commitment::hash).collect()),
         runner.other_account_address(),
         19u32,
     );
@@ -499,10 +481,9 @@ async fn test_contract_withdraw_old_root() {
 
     let input_creator = CircuitInputCreator::new(
         my_commitment.clone(),
-        MerkleTreeBuilder::contract_height_with_leafs(
+        MerkleTree::contract_height_with_leafs(
             commitments.iter().take(3).map(Commitment::hash).collect(),
-        )
-        .build(),
+        ),
         runner.other_account_address(),
         19u32,
     );
