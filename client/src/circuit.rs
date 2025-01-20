@@ -1,12 +1,15 @@
 use std::str::FromStr;
 
-use crate::hash::{hash, hash_one};
+use crate::{
+    hash::{hash, hash_one},
+    merkle::{FindLeafMerkleTree, RootMerkleTree},
+};
 
 use cainome::cairo_serde::U256;
 use serde::{Deserialize, Serialize};
 use starknet_crypto::Felt;
 
-use crate::merkle_tree::MerkleTree;
+use crate::merkle::MerkleTree;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
@@ -84,7 +87,7 @@ impl CircuitInputCreator {
         self.create_with_optional_refund(Some(refund_commitment))
     }
     fn create_with_optional_refund(&self, refund_commitment: Option<&Commitment>) -> CircuitInput {
-        let path = self.merkle_tree.path_leaf(self.commitment.hash());
+        let path = self.merkle_tree.find_path(&self.commitment.hash()).unwrap();
         let refund_amount = refund_commitment.map_or(U256::ZERO, |r| r.amount);
         CircuitInput {
             root: self.merkle_tree.root(),

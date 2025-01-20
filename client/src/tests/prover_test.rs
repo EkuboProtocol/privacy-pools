@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use crate::{
     circuit::{CircuitInputCreator, Commitment},
-    merkle_tree::MerkleTreeBuilder,
+    merkle::{MerkleTree, RootMerkleTree},
     prover::Prover,
 };
 use cainome::cairo_serde::U256;
@@ -22,7 +22,7 @@ async fn test_prover_basic() {
         .get_calldata(
             CircuitInputCreator::new(
                 my_commitment.clone(),
-                MerkleTreeBuilder::contract_height_with_leafs(commitments).build(),
+                MerkleTree::contract_height_with_leafs(commitments),
                 999888666u32,
                 1u32,
             )
@@ -47,7 +47,7 @@ async fn test_prover_refund_greater_than_amount() {
         .get_calldata(
             CircuitInputCreator::new(
                 my_commitment.clone(),
-                MerkleTreeBuilder::contract_height_with_leafs(commitments).build(),
+                MerkleTree::contract_height_with_leafs(commitments),
                 999888666u32,
                 1u32,
             )
@@ -72,7 +72,7 @@ async fn test_prover_fee_greater_than_amount() {
         .get_calldata(
             CircuitInputCreator::new(
                 my_commitment.clone(),
-                MerkleTreeBuilder::contract_height_with_leafs(commitments).build(),
+                MerkleTree::contract_height_with_leafs(commitments),
                 999888666u32,
                 101u32,
             )

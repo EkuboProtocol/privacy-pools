@@ -142,6 +142,7 @@ impl<'a, const P: bool> PoolContractDeployer<'a, false, P, false> {
             .unwrap()
             .wait_for_completion()
             .await;
+        dbg!(_ecip_declaration.class_hash);
         let declaration = ContractDeclaration::verifier(self.client)
             .declare(self.account)
             .await

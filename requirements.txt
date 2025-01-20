@@ -1,1 +1,1 @@
-garaga==0.14.0
+git+https://github.com/keep-starknet-strange/garaga.git@3c87bb06ef6a86fa1180fc97de9396317b582cde#egg=garaga
