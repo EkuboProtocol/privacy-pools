@@ -1,6 +1,6 @@
 pragma circom 2.2.0;
-include "mockHash.circom";
-include "merkleTree.circom";
+include "hash.circom";
+include "merkle_tree.circom";
 include "./circomlib/comparators.circom";
 
 // computes Pedersen(nullifier + secret)
@@ -62,5 +62,3 @@ template Withdraw(levels) {
     recipientSquare <== recipient * recipient;
     feeSquare <== fee * fee;
 }
-
-component main {public [root, nullifierHash, recipient, fee, amount, refundCommitmentHash]} = Withdraw(32);

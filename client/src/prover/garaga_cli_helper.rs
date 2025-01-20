@@ -44,10 +44,22 @@ impl GaragaCliHelper {
     }
     pub fn generate_witness(&self) {
         let output = Command::new("node")
-            .arg("../target/withdraw_js/generate_witness.js")
-            .arg("../target/withdraw_js/withdraw.wasm")
-            .arg("../target/withdraw_js/input_generated.json")
-            .arg("../target/withdraw_js/withdraw.wtns")
+            .arg(format!(
+                "../target/{}_js/generate_witness.js",
+                self.circuit_name
+            ))
+            .arg(format!(
+                "../target/{}_js/{}.wasm",
+                self.circuit_name, self.circuit_name
+            ))
+            .arg(format!(
+                "../target/{}_js/input_generated.json",
+                self.circuit_name
+            ))
+            .arg(format!(
+                "../target/{}_js/{}.wtns",
+                self.circuit_name, self.circuit_name
+            ))
             .output()
             .unwrap();
         assert!(output.status.success());
@@ -61,7 +73,7 @@ impl GaragaCliHelper {
             .arg("groth16")
             .arg("prove")
             .arg(format!("../target/{}_0001.zkey", self.circuit_name))
-            .arg(format!("../target/{}_js/withdraw.wtns", self.circuit_name))
+            .arg(format!("../target/{}_js/pool.wtns", self.circuit_name))
             .arg(&self.proof_path)
             .arg(&self.public_inputs_path)
             .current_dir(&self.dir)
