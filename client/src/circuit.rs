@@ -26,6 +26,10 @@ pub struct CircuitInput {
     pub path_elements: Vec<U256>,
     pub path_indices: Vec<U256>,
     pub amount: U256,
+
+    pub associated_set_root: U256,
+    pub associated_set_path_elements: Vec<U256>,
+    pub associated_set_path_indices: Vec<U256>,
 }
 
 #[derive(Debug, Clone)]
@@ -34,6 +38,7 @@ pub struct CircuitInputCreator {
     pub recipient: Felt,
     pub fee: U256,
     pub merkle_tree: MerkleTree,
+    pub associated_set_merkle_tree: MerkleTree,
 }
 
 #[derive(Debug, Clone)]
@@ -70,6 +75,7 @@ impl CircuitInputCreator {
     pub fn new(
         commitment: Commitment,
         tree: MerkleTree,
+        associated_set_tree: MerkleTree,
         recipient: impl Into<Felt>,
         fee: impl Into<U256>,
     ) -> Self {
@@ -78,6 +84,7 @@ impl CircuitInputCreator {
             recipient: recipient.into(),
             fee: fee.into(),
             merkle_tree: tree,
+            associated_set_merkle_tree: associated_set_tree,
         }
     }
     pub fn create(&self) -> CircuitInput {
@@ -88,6 +95,10 @@ impl CircuitInputCreator {
     }
     fn create_with_optional_refund(&self, refund_commitment: Option<&Commitment>) -> CircuitInput {
         let path = self.merkle_tree.find_path(&self.commitment.hash()).unwrap();
+        let associated_set_path = self
+            .associated_set_merkle_tree
+            .find_path(&self.commitment.hash())
+            .unwrap();
         let refund_amount = refund_commitment.map_or(U256::ZERO, |r| r.amount);
         CircuitInput {
             root: self.merkle_tree.root(),
@@ -106,6 +117,13 @@ impl CircuitInputCreator {
                 .map(|b| if b { U256::ONE } else { U256::ZERO })
                 .collect(),
             amount: self.commitment.amount - refund_amount,
+            associated_set_root: self.associated_set_merkle_tree.root(),
+            associated_set_path_elements: associated_set_path.elements,
+            associated_set_path_indices: associated_set_path
+                .indices
+                .into_iter()
+                .map(|b| if b { U256::ONE } else { U256::ZERO })
+                .collect(),
         }
     }
 }

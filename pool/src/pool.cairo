@@ -15,6 +15,7 @@ struct PublicOutput {
     fee: u256,
     refundCommitmentHash: u256,
     amount: u256,
+    associated_set_root: u256,
 }
 
 #[generate_trait]
@@ -28,6 +29,7 @@ impl PublicOutputImpl of PublicOutputTrait {
             fee: *span[3],
             refundCommitmentHash: *span[4],
             amount: *span[5],
+            associated_set_root: *span[6],
         }
     }
 }
@@ -41,6 +43,7 @@ mod Pool {
     use starknet::storage::{Map, StoragePathEntry, StoragePointerWriteAccess};
     use starknet::{ContractAddress, get_caller_address, get_contract_address};
     use openzeppelin::token::erc20::interface::IERC20Dispatcher;
+    use starknet::event::EventEmitter;
 
     use crate::verifier::groth16_verifier::{
         IGroth16VerifierBN254Dispatcher, IGroth16VerifierBN254DispatcherTrait,
@@ -63,9 +66,19 @@ mod Pool {
     }
 
     #[event]
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     enum Event {
         MerkleEvent: MerkleTreeComponent::Event,
+        AssociationToSet: AssociationToSet,
+    }
+
+    #[derive(Drop, PartialEq, starknet::Event)]
+    pub struct AssociationToSet {
+        #[key]
+        pub caller: ContractAddress,
+        #[key]
+        pub recipient: ContractAddress,
+        pub associated_set_root: u256,
     }
 
     #[constructor]
@@ -122,6 +135,16 @@ mod Pool {
                 );
 
             self.merkle.add_leaf(public_output.refundCommitmentHash);
+
+            let caller = get_caller_address();
+            self
+                .emit(
+                    AssociationToSet {
+                        caller,
+                        recipient: public_output.recipient,
+                        associated_set_root: public_output.associated_set_root,
+                    },
+                );
 
             true
         }

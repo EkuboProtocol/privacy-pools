@@ -24,7 +24,7 @@ impl Default for Prover {
 impl Prover {
     pub fn new() -> Self {
         Self {
-            cli: GaragaCliHelper::new("../target", "withdraw", "../target/verification_key.json"),
+            cli: GaragaCliHelper::new("../target", "pool", "../target/verification_key.json"),
         }
     }
     pub async fn get_calldata(&self, input: CircuitInput) -> Vec<Felt> {

@@ -1,6 +1,6 @@
 pragma circom 2.2.0;
-include "mockHash.circom";
-include "merkleTree.circom";
+include "hash.circom";
+include "merkle_tree.circom";
 include "./circomlib/comparators.circom";
 
 // computes Pedersen(nullifier + secret)
@@ -11,9 +11,9 @@ template CommitmentHasher() {
     signal output commitment;
     signal output nullifierHash;
     signal temp;
-    temp <== MockHash()([secret, nullifier]);
-    commitment <== MockHash()([temp, amount]);
-    nullifierHash <== MockHashOne()(nullifier);
+    temp <== Hash()([secret, nullifier]);
+    commitment <== Hash()([temp, amount]);
+    nullifierHash <== HashOne()(nullifier);
 }
 
 // Verifies that commitment that corresponds to given secret and nullifier is included in the merkle tree of deposits
@@ -62,5 +62,3 @@ template Withdraw(levels) {
     recipientSquare <== recipient * recipient;
     feeSquare <== fee * fee;
 }
-
-component main {public [root, nullifierHash, recipient, fee, amount, refundCommitmentHash]} = Withdraw(32);

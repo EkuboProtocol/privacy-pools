@@ -18,11 +18,19 @@ async fn test_prover_basic() {
         U256::from_str("0x748392").unwrap(),
     ];
 
+    let associated_set_commitments = vec![
+        U256::from_str("0x123456").unwrap(),
+        U256::from_str("0x654321").unwrap(),
+        my_commitment.hash(),
+        U256::from_str("0x111111").unwrap(),
+    ];
+
     Prover::new()
         .get_calldata(
             CircuitInputCreator::new(
                 my_commitment.clone(),
                 MerkleTree::contract_height_with_leafs(commitments),
+                MerkleTree::contract_height_with_leafs(associated_set_commitments),
                 999888666u32,
                 1u32,
             )
@@ -43,11 +51,19 @@ async fn test_prover_refund_greater_than_amount() {
         U256::from_str("0x748392").unwrap(),
     ];
 
+    let associated_set_commitments = vec![
+        U256::from_str("0x123456").unwrap(),
+        U256::from_str("0x654321").unwrap(),
+        my_commitment.hash(),
+        U256::from_str("0x111111").unwrap(),
+    ];
+
     Prover::new()
         .get_calldata(
             CircuitInputCreator::new(
                 my_commitment.clone(),
                 MerkleTree::contract_height_with_leafs(commitments),
+                MerkleTree::contract_height_with_leafs(associated_set_commitments),
                 999888666u32,
                 1u32,
             )
@@ -68,11 +84,19 @@ async fn test_prover_fee_greater_than_amount() {
         U256::from_str("0x748392").unwrap(),
     ];
 
+    let associated_set_commitments = vec![
+        U256::from_str("0x123456").unwrap(),
+        U256::from_str("0x654321").unwrap(),
+        my_commitment.hash(),
+        U256::from_str("0x111111").unwrap(),
+    ];
+
     Prover::new()
         .get_calldata(
             CircuitInputCreator::new(
                 my_commitment.clone(),
                 MerkleTree::contract_height_with_leafs(commitments),
+                MerkleTree::contract_height_with_leafs(associated_set_commitments),
                 999888666u32,
                 101u32,
             )
