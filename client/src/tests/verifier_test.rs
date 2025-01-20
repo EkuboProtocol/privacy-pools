@@ -36,11 +36,19 @@ async fn test_verifier() {
         U256::from_str("0x748392").unwrap(),
     ];
 
+    let associated_set_commitments = vec![
+        U256::from_str("0x123456").unwrap(),
+        U256::from_str("0x654321").unwrap(),
+        my_commitment.hash(),
+        U256::from_str("0x111111").unwrap(),
+    ];
+
     let proof = Prover::new()
         .get_calldata(
             CircuitInputCreator::new(
                 my_commitment.clone(),
                 MerkleTree::contract_height_with_leafs(commitments),
+                MerkleTree::contract_height_with_leafs(associated_set_commitments),
                 11u32,
                 12u32,
             )
@@ -55,7 +63,7 @@ async fn test_verifier() {
         .unwrap()
         .unwrap();
 
-    // The first two results are hashes and are tested elsewhere
+    // The first two results and last are hashes and are tested elsewhere
     assert_eq!(result[2], 11u32.into());
     assert_eq!(result[3], 12u32.into());
     assert_eq!(result[4], 0u32.into());

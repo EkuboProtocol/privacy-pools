@@ -1,7 +1,7 @@
 pragma circom 2.2.0;
 include "./circomlib/poseidon.circom";
 
-template MockHash() {
+template Hash() {
     signal input inputs[2];
     signal output out;
 
@@ -10,9 +10,9 @@ template MockHash() {
     out <== poseidon.out;
 }
 
-template MockHashOne() {
+template HashOne() {
     signal input in;
     signal output out;
 
-    out <== MockHash()([in, in]);
+    out <== Hash()([in, in]);
 }

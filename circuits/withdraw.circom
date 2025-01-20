@@ -11,9 +11,9 @@ template CommitmentHasher() {
     signal output commitment;
     signal output nullifierHash;
     signal temp;
-    temp <== MockHash()([secret, nullifier]);
-    commitment <== MockHash()([temp, amount]);
-    nullifierHash <== MockHashOne()(nullifier);
+    temp <== Hash()([secret, nullifier]);
+    commitment <== Hash()([temp, amount]);
+    nullifierHash <== HashOne()(nullifier);
 }
 
 // Verifies that commitment that corresponds to given secret and nullifier is included in the merkle tree of deposits

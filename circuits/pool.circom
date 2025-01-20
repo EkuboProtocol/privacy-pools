@@ -1,7 +1,7 @@
 pragma circom 2.2.0;
 include "withdraw.circom";
 
-template Pool(levels) {
+template Pool(levels, associatedSetLevels) {
     signal input root;
     signal input nullifierHash;
     signal input recipient; // not taking part in any computations
@@ -30,6 +30,25 @@ template Pool(levels) {
         withdraw.pathElements[i] <== pathElements[i];
         withdraw.pathIndices[i] <== pathIndices[i];
     }
+
+    signal input associatedSetRoot;
+    signal input associatedSetPathElements[associatedSetLevels];
+    signal input associatedSetPathIndices[associatedSetLevels];
+    component associatedSet = Withdraw(associatedSetLevels);
+    associatedSet.root <== associatedSetRoot;
+    associatedSet.nullifierHash <== nullifierHash;
+    associatedSet.recipient <== recipient;
+    associatedSet.fee <== fee;
+    associatedSet.refund <== refund;
+    associatedSet.refundCommitmentHash <== refundCommitmentHash;
+    associatedSet.commitmentAmount <== commitmentAmount;
+    associatedSet.nullifier <== nullifier;
+    associatedSet.secret <== secret;
+    associatedSet.amount <== amount;
+    for (var i = 0; i < associatedSetLevels; i++) {
+        associatedSet.pathElements[i] <== associatedSetPathElements[i];
+        associatedSet.pathIndices[i] <== associatedSetPathIndices[i];
+    }
 }
 
-component main {public [root, nullifierHash, recipient, fee, amount, refundCommitmentHash]} = Pool(32);
+component main {public [root, nullifierHash, recipient, fee, amount, refundCommitmentHash, associatedSetRoot]} = Pool(32, 32);

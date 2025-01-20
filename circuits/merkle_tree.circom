@@ -8,7 +8,7 @@ template HashLeftRight() {
     signal input right;
     signal output hash;
 
-    hash <== MockHash()([left, right]);
+    hash <== Hash()([left, right]);
 }
 
 // if s == 0 returns [in[0], in[1]]

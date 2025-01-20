@@ -36,6 +36,13 @@ async fn test_contract_withdraw_simple() {
         Commitment::new(3u32, 3u32, 1000u32),
     ];
 
+    let associated_set_commitments = vec![
+        Commitment::new(514u32, 876u32, 100u32),
+        Commitment::new(1u32, 1u32, 800u32),
+        my_commitment.clone(),
+        Commitment::new(3u32, 3u32, 1000u32),
+    ];
+
     let sum: U256 = commitments
         .iter()
         .map(|c| c.amount)
@@ -69,6 +76,12 @@ async fn test_contract_withdraw_simple() {
     let input_creator = CircuitInputCreator::new(
         my_commitment.clone(),
         MerkleTree::contract_height_with_leafs(commitments.iter().map(Commitment::hash).collect()),
+        MerkleTree::contract_height_with_leafs(
+            associated_set_commitments
+                .iter()
+                .map(Commitment::hash)
+                .collect(),
+        ),
         runner.other_account_address(),
         2u32,
     );
@@ -119,6 +132,13 @@ async fn test_contract_withdraw_nullifier() {
         Commitment::new(3u32, 3u32, 1000u32),
     ];
 
+    let associated_set_commitments = vec![
+        Commitment::new(514u32, 876u32, 100u32),
+        Commitment::new(1u32, 1u32, 800u32),
+        my_commitment.clone(),
+        Commitment::new(3u32, 3u32, 1000u32),
+    ];
+
     let sum: U256 = commitments
         .iter()
         .map(|c| c.amount)
@@ -143,6 +163,12 @@ async fn test_contract_withdraw_nullifier() {
     let input_creator = CircuitInputCreator::new(
         my_commitment.clone(),
         MerkleTree::contract_height_with_leafs(commitments.iter().map(Commitment::hash).collect()),
+        MerkleTree::contract_height_with_leafs(
+            associated_set_commitments
+                .iter()
+                .map(Commitment::hash)
+                .collect(),
+        ),
         999888555,
         2u32,
     );
@@ -190,6 +216,13 @@ async fn test_contract_withdraw_refund() {
         Commitment::new(3u32, 3u32, 1000u32),
     ];
 
+    let mut associated_set_commitments = vec![
+        Commitment::new(514u32, 876u32, 100u32),
+        Commitment::new(1u32, 1u32, 800u32),
+        my_commitment.clone(),
+        Commitment::new(3u32, 3u32, 1000u32),
+    ];
+
     let sum: U256 = commitments
         .iter()
         .map(|c| c.amount)
@@ -223,6 +256,12 @@ async fn test_contract_withdraw_refund() {
     let input_creator = CircuitInputCreator::new(
         my_commitment.clone(),
         MerkleTree::contract_height_with_leafs(commitments.iter().map(Commitment::hash).collect()),
+        MerkleTree::contract_height_with_leafs(
+            associated_set_commitments
+                .iter()
+                .map(Commitment::hash)
+                .collect(),
+        ),
         runner.other_account_address(),
         2u32,
     );
@@ -260,10 +299,17 @@ async fn test_contract_withdraw_refund() {
     );
 
     commitments.push(refund_commitment.clone());
+    associated_set_commitments.push(refund_commitment.clone());
 
     let input_creator = CircuitInputCreator::new(
         refund_commitment.clone(),
         MerkleTree::contract_height_with_leafs(commitments.iter().map(Commitment::hash).collect()),
+        MerkleTree::contract_height_with_leafs(
+            associated_set_commitments
+                .iter()
+                .map(Commitment::hash)
+                .collect(),
+        ),
         runner.other_account_2_address(),
         2u32,
     );
@@ -316,6 +362,13 @@ async fn test_contract_withdraw_insufficient_fee_panic() {
         Commitment::new(3u32, 3u32, 1000u32),
     ];
 
+    let associated_set_commitments = vec![
+        Commitment::new(514u32, 876u32, 100u32),
+        Commitment::new(1u32, 1u32, 800u32),
+        my_commitment.clone(),
+        Commitment::new(3u32, 3u32, 1000u32),
+    ];
+
     let sum: U256 = commitments
         .iter()
         .map(|c| c.amount)
@@ -349,6 +402,12 @@ async fn test_contract_withdraw_insufficient_fee_panic() {
     let input_creator = CircuitInputCreator::new(
         my_commitment.clone(),
         MerkleTree::contract_height_with_leafs(commitments.iter().map(Commitment::hash).collect()),
+        MerkleTree::contract_height_with_leafs(
+            associated_set_commitments
+                .iter()
+                .map(Commitment::hash)
+                .collect(),
+        ),
         runner.other_account_address(),
         19u32,
     );
@@ -401,6 +460,13 @@ async fn test_contract_withdraw_wrong_root_panic() {
         Commitment::new(3u32, 3u32, 1000u32),
     ];
 
+    let associated_set_commitments = vec![
+        Commitment::new(514u32, 876u32, 100u32),
+        Commitment::new(1u32, 1u32, 800u32),
+        my_commitment.clone(),
+        Commitment::new(3u32, 3u32, 1000u32),
+    ];
+
     let sum: U256 = commitments
         .iter()
         .map(|c| c.amount)
@@ -425,6 +491,12 @@ async fn test_contract_withdraw_wrong_root_panic() {
     let input_creator = CircuitInputCreator::new(
         my_commitment.clone(),
         MerkleTree::contract_height_with_leafs(commitments.iter().map(Commitment::hash).collect()),
+        MerkleTree::contract_height_with_leafs(
+            associated_set_commitments
+                .iter()
+                .map(Commitment::hash)
+                .collect(),
+        ),
         runner.other_account_address(),
         19u32,
     );
@@ -458,6 +530,13 @@ async fn test_contract_withdraw_old_root() {
         Commitment::new(3u32, 3u32, 1000u32),
     ];
 
+    let associated_set_commitments = vec![
+        Commitment::new(514u32, 876u32, 100u32),
+        Commitment::new(1u32, 1u32, 800u32),
+        my_commitment.clone(),
+        Commitment::new(3u32, 3u32, 1000u32),
+    ];
+
     let sum: U256 = commitments
         .iter()
         .map(|c| c.amount)
@@ -483,6 +562,12 @@ async fn test_contract_withdraw_old_root() {
         my_commitment.clone(),
         MerkleTree::contract_height_with_leafs(
             commitments.iter().take(3).map(Commitment::hash).collect(),
+        ),
+        MerkleTree::contract_height_with_leafs(
+            associated_set_commitments
+                .iter()
+                .map(Commitment::hash)
+                .collect(),
         ),
         runner.other_account_address(),
         19u32,
