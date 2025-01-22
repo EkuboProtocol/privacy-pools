@@ -17,7 +17,7 @@ fn ecip() {
 
     let abigen = Abigen::new(
         "UniversalECIP",
-        "../pool/target/dev/pool_UniversalECIP.contract_class.json",
+        "../target/dev/pool_UniversalECIP.contract_class.json",
     )
     .with_types_aliases(aliases)
     .with_derives(vec!["Debug".to_string(), "PartialEq".to_string()])
@@ -39,7 +39,7 @@ fn verifier() {
 
     let abigen = Abigen::new(
         "Groth16VerifierBN254",
-        "../pool/target/dev/pool_Groth16VerifierBN254.contract_class.json",
+        "../target/dev/pool_Groth16VerifierBN254.contract_class.json",
     )
     .with_types_aliases(aliases)
     .with_derives(vec!["Debug".to_string(), "PartialEq".to_string()])
@@ -54,13 +54,20 @@ fn verifier() {
 
 fn pool() {
     let mut aliases = HashMap::new();
-    aliases.insert(String::from("pool::Pool::Event"), String::from("PoolEvent"));
+    aliases.insert(
+        String::from("pool::pool::Pool::Event"),
+        String::from("PoolEvent"),
+    );
+    aliases.insert(
+        String::from("pool::pool::Pool::Event::OwnableEvent"),
+        String::from("OwnableEvent"),
+    );
     aliases.insert(
         String::from("pool::merkle::MerkleTreeComponent::Event"),
         String::from("MerkleTreeEvent"),
     );
 
-    let abigen = Abigen::new("Pool", "../pool/target/dev/pool_Pool.contract_class.json")
+    let abigen = Abigen::new("Pool", "../target/dev/pool_Pool.contract_class.json")
         .with_types_aliases(aliases)
         .with_derives(vec!["Debug".to_string(), "PartialEq".to_string()])
         .with_contract_derives(vec!["Debug".to_string(), "Clone".to_string()]);

@@ -1,4 +1,4 @@
-use client::abigen::pool::{Deposit, Event};
+use client::abigen::pool::{Deposit, PoolEvent};
 use starknet::{
     core::types::{EmittedEvent, Felt, TransactionReceipt, TransactionReceiptWithBlockInfo},
     providers::{jsonrpc::HttpTransport, JsonRpcClient, Provider, ProviderError, Url},
@@ -45,9 +45,9 @@ impl StarkNet {
                     block_number: transaction_receipt.block.block_number(),
                     transaction_hash,
                 })
-                .map(|event| Event::try_from(&event).unwrap())
+                .map(|event| PoolEvent::try_from(&event).unwrap())
                 .filter_map(|event| {
-                    if let Event::Deposit(deposit) = event {
+                    if let PoolEvent::Deposit(deposit) = event {
                         Some(deposit)
                     } else {
                         None

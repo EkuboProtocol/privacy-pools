@@ -1,19 +1,18 @@
 pub const VERIFIER_SIERRA_STR: &str =
-    include_str!("../../../pool/target/dev/pool_Groth16VerifierBN254.contract_class.json");
+    include_str!("../../../target/dev/pool_Groth16VerifierBN254.contract_class.json");
 pub const VERIFIER_CASM_STR: &str =
-    include_str!("../../../pool/target/dev/pool_Groth16VerifierBN254.compiled_contract_class.json");
-pub const POOL_SIERRA_STR: &str =
-    include_str!("../../../pool/target/dev/pool_Pool.contract_class.json");
+    include_str!("../../../target/dev/pool_Groth16VerifierBN254.compiled_contract_class.json");
+pub const POOL_SIERRA_STR: &str = include_str!("../../../target/dev/pool_Pool.contract_class.json");
 pub const POOL_CASM_STR: &str =
-    include_str!("../../../pool/target/dev/pool_Pool.compiled_contract_class.json");
+    include_str!("../../../target/dev/pool_Pool.compiled_contract_class.json");
 pub const UNIVERSAL_ECIP_SIERRA_STR: &str =
-    include_str!("../../../pool/target/dev/pool_UniversalECIP.contract_class.json");
+    include_str!("../../../target/dev/pool_UniversalECIP.contract_class.json");
 pub const UNIVERSAL_ECIP_CASM_STR: &str =
-    include_str!("../../../pool/target/dev/pool_UniversalECIP.compiled_contract_class.json");
+    include_str!("../../../target/dev/pool_UniversalECIP.compiled_contract_class.json");
 pub const ERC20_SIERRA_STR: &str =
-    include_str!("../../../pool/target/dev/pool_ERC20Upgradeable.contract_class.json");
+    include_str!("../../../target/dev/pool_ERC20Upgradeable.contract_class.json");
 pub const ERC20_CASM_STR: &str =
-    include_str!("../../../pool/target/dev/pool_ERC20Upgradeable.compiled_contract_class.json");
+    include_str!("../../../target/dev/pool_ERC20Upgradeable.compiled_contract_class.json");
 
 use std::sync::Arc;
 

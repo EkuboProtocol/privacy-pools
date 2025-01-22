@@ -104,6 +104,12 @@ enum Commands {
         amount: U256,
 
         #[arg(long)]
+        refund_secret: U256,
+
+        #[arg(long)]
+        refund_nullifier: U256,
+
+        #[arg(long)]
         refund_amount: U256,
 
         #[arg(long)]
@@ -173,6 +179,8 @@ async fn main() {
             secret,
             nullifier,
             amount,
+            refund_secret,
+            refund_nullifier,
             refund_amount,
             recipient,
         } => {
@@ -198,7 +206,7 @@ async fn main() {
                 .await
                 .unwrap();
 
-            let refund_commitment = Commitment::new(secret, nullifier, refund_amount);
+            let refund_commitment = Commitment::new(refund_secret, refund_nullifier, refund_amount);
 
             let circuit_input = CircuitInput {
                 root: merkle_tree_root,

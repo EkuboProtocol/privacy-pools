@@ -218,6 +218,7 @@ impl<'a> PoolContractDeployer<'a, true, true, true> {
     ) -> DeployResult {
         let min_fee = min_fee.into();
         let constructor_calldata = vec![
+            self.account.address(),
             transfer_token_address,
             self.verifier_deployment.as_ref().unwrap().deployed_address,
             min_fee.low.into(),

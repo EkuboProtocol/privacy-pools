@@ -18,6 +18,4 @@ deactivate
 cp verifier/src/groth16_verifier_constants.cairo pool/src/verifier/groth16_verifier_constants.cairo
 # cp verifier/src/groth16_verifier.cairo pool/src/verifier/groth16_verifier.cairo
 # add pub to trait IGroth16VerifierBN254<TContractState> in pool/src/verifier/groth16_verifier.cairo
-cd pool
 scarb build
-cd ..
