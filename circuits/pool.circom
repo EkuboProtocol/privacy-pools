@@ -1,5 +1,5 @@
 pragma circom 2.2.0;
-include "withdraw.circom";
+include "association.circom";
 
 template Pool(levels, associatedSetLevels) {
     signal input root;
@@ -15,7 +15,7 @@ template Pool(levels, associatedSetLevels) {
     signal input pathIndices[levels];
     signal input amount;
 
-    component withdraw = Withdraw(levels);
+    component withdraw = AssociationChecker(levels);
     withdraw.root <== root;
     withdraw.nullifierHash <== nullifierHash;
     withdraw.recipient <== recipient;
@@ -34,7 +34,7 @@ template Pool(levels, associatedSetLevels) {
     signal input associatedSetRoot;
     signal input associatedSetPathElements[associatedSetLevels];
     signal input associatedSetPathIndices[associatedSetLevels];
-    component associatedSet = Withdraw(associatedSetLevels);
+    component associatedSet = AssociationChecker(associatedSetLevels);
     associatedSet.root <== associatedSetRoot;
     associatedSet.nullifierHash <== nullifierHash;
     associatedSet.recipient <== recipient;
@@ -51,4 +51,4 @@ template Pool(levels, associatedSetLevels) {
     }
 }
 
-component main {public [root, nullifierHash, recipient, fee, amount, refundCommitmentHash, associatedSetRoot]} = Pool(32, 32);
+component main {public [root, nullifierHash, recipient, fee, amount, refundCommitmentHash, associatedSetRoot]} = Pool(16, 16);

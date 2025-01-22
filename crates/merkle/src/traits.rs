@@ -1,21 +1,8 @@
-mod append_merkle_tree;
-#[cfg(test)]
-mod dumb_merkle_tree;
-mod hybrid_merkle_tree;
-
-use crate::hash::hash;
 use cainome::cairo_serde::U256;
 
-pub use hybrid_merkle_tree::HybridMerkleTree as MerkleTree;
+use crate::structs::MerklePath;
 
 pub const CONTRACT_MERKLE_TREE_HEIGHT: usize = 17;
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct MerklePath {
-    pub elements: Vec<U256>,
-    //element is right
-    pub indices: Vec<bool>,
-}
 
 pub trait RootMerkleTree {
     fn new(height: usize) -> Self
@@ -59,26 +46,4 @@ pub trait FindLeafMerkleTree: PathMerkleTree {
     fn find_path(&self, leaf: &U256) -> Option<MerklePath> {
         self.find_leaf_index(leaf).map(|i| self.path(i))
     }
-}
-
-fn precomputed_hashes(size: usize) -> Vec<U256> {
-    let mut arr = Vec::new();
-    arr.push(U256::ZERO);
-
-    for i in 1..size {
-        let last = arr[i - 1];
-        arr.push(hash(last, last));
-    }
-
-    arr
-}
-
-#[test] 
-fn test_generate_cairo_precomputed() {
-    let mut result = "\tlet mut arr = array![\n".to_string();
-    for h in precomputed_hashes(9) {
-        result += &format!("\t\t{},\n", h.to_string());
-    }
-    result += "\t];\n";
-    println!("{result}");
 }

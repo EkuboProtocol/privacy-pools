@@ -1,0 +1,8 @@
+[package]
+name = "merkle"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+cainome.workspace = true
+hash.workspace = true

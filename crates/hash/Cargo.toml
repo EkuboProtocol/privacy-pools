@@ -1,0 +1,9 @@
+[package]
+name = "hash"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+ark-ff.workspace = true
+cainome.workspace = true
+prefix-hex.workspace = true

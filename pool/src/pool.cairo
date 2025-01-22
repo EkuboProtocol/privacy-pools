@@ -69,15 +69,26 @@ mod Pool {
     #[derive(Drop, PartialEq, starknet::Event)]
     enum Event {
         MerkleEvent: MerkleTreeComponent::Event,
-        AssociationToSet: AssociationToSet,
+        Withdrawal: Withdrawal,
+        Deposit: Deposit,
     }
 
     #[derive(Drop, PartialEq, starknet::Event)]
-    pub struct AssociationToSet {
+    pub struct Deposit {
+        #[key]
+        pub caller: ContractAddress,
+        #[key]
+        pub secret_and_nullifier_hash: u256,
+        pub amount: u256,
+    }
+
+    #[derive(Drop, PartialEq, starknet::Event)]
+    pub struct Withdrawal {
         #[key]
         pub caller: ContractAddress,
         #[key]
         pub recipient: ContractAddress,
+        pub amount: u256,
         pub associated_set_root: u256,
     }
 
@@ -104,6 +115,7 @@ mod Pool {
             let caller = get_caller_address();
             let this = get_contract_address();
             self.transfer_token.read().transfer_from(caller, this, amount.into());
+            self.emit(Deposit { caller, secret_and_nullifier_hash, amount });
             true
         }
 
@@ -139,9 +151,10 @@ mod Pool {
             let caller = get_caller_address();
             self
                 .emit(
-                    AssociationToSet {
+                    Withdrawal {
                         caller,
                         recipient: public_output.recipient,
+                        amount: public_output.amount,
                         associated_set_root: public_output.associated_set_root,
                     },
                 );

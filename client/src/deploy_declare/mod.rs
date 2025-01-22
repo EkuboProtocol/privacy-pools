@@ -96,6 +96,11 @@ impl<'a> ERC20ContractDeployer<'a, 1> {
             .unwrap()
             .wait_for_completion()
             .await;
+
+        tracing::info!(
+            "ERC20 contract address: {}",
+            deployment.deployed_address.to_hex_string()
+        );
         ERC20ContractDeployer {
             account: self.account,
             client: self.client,
@@ -190,6 +195,11 @@ impl<'a, const P: bool> PoolContractDeployer<'a, true, P, false> {
             .unwrap()
             .wait_for_completion()
             .await;
+
+        tracing::info!(
+            "Verifier contract address: {}",
+            deployment.deployed_address.to_hex_string()
+        );
         PoolContractDeployer {
             account: self.account,
             client: self.client,
@@ -213,7 +223,7 @@ impl<'a> PoolContractDeployer<'a, true, true, true> {
             min_fee.low.into(),
             min_fee.high.into(),
         ];
-        ContractDeployment::new(self.client)
+        let deployment = ContractDeployment::new(self.client)
             .deploy(
                 constructor_calldata,
                 SigningKey::from_random().secret_scalar(),
@@ -223,7 +233,13 @@ impl<'a> PoolContractDeployer<'a, true, true, true> {
             .await
             .unwrap()
             .wait_for_completion()
-            .await
+            .await;
+
+        tracing::info!(
+            "Pool contract address: {}",
+            deployment.deployed_address.to_hex_string()
+        );
+        deployment
     }
     pub fn verifier_address(&self) -> Felt {
         self.verifier_deployment.as_ref().unwrap().deployed_address

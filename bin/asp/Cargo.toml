@@ -1,23 +1,20 @@
 [package]
-name = "client"
+name = "asp"
 version.workspace = true
 edition.workspace = true
 
 [dependencies]
+axum.workspace = true
 cainome.workspace = true
-futures.workspace = true
-lazy_static.workspace = true
-num-bigint.workspace = true
+clap.workspace = true
+hash.workspace = true
+merkle.workspace = true
 serde.workspace = true
-serde_json.workspace = true
 starknet.workspace = true
-starknet-crypto.workspace = true
-starknet-types-core.workspace = true
 thiserror.workspace = true
 tokio.workspace = true
 tracing.workspace = true
-ark-ff.workspace = true
-prefix-hex.workspace = true
+tracing-subscriber.workspace = true
 
 [build-dependencies]
 cainome.workspace = true

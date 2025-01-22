@@ -1,5 +1,5 @@
 use crate::{
-    abigen::privacy_pools_garaga_pool::{PrivacyPoolsGaragaPool, PrivacyPoolsGaragaPoolReader},
+    abigen::pool::{Pool, PoolReader},
     circuit::Commitment,
     merkle::{MerkleTree, RootMerkleTree},
     testnet::runner::KatanaRunner,
@@ -14,7 +14,7 @@ async fn test_contract_merkle_tree_empty() {
     let runner = KatanaRunner::load();
     let helper = single_deploy_helper(&runner).await;
 
-    let pool_reader = PrivacyPoolsGaragaPoolReader::new(helper.pool_address, runner.client());
+    let pool_reader = PoolReader::new(helper.pool_address, runner.client());
     let contract_root = pool_reader.current_root().call().await.unwrap();
     assert_eq!(MerkleTree::new_with_contract_height().root(), contract_root);
 }
@@ -27,7 +27,7 @@ async fn test_contract_merkle_tree_addition() {
         pool_address,
         erc20_address,
     } = single_deploy_helper(&runner).await;
-    let pool = PrivacyPoolsGaragaPool::new(pool_address, prefunded_account.clone());
+    let pool = Pool::new(pool_address, prefunded_account.clone());
 
     approve_helper(pool_address, 300u32, erc20_address, prefunded_account).await;
 
@@ -76,7 +76,7 @@ async fn test_contract_merkle_tree_multiple() {
         pool_address,
         erc20_address,
     } = single_deploy_helper(&runner).await;
-    let pool = PrivacyPoolsGaragaPool::new(pool_address, prefunded_account.clone());
+    let pool = Pool::new(pool_address, prefunded_account.clone());
 
     let commitments: Vec<_> = (0..12u32).map(|i| Commitment::new(i, i, i * 100)).collect();
 

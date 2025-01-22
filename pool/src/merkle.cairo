@@ -61,7 +61,7 @@ pub mod MerkleTreeComponent {
     }
 }
 
-pub const height: u32 = 33;
+pub const height: u32 = 17;
 
 fn precomputed_hashes() -> Array<u256> {
     let mut arr = array![

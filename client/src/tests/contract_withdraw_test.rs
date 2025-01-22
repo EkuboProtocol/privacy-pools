@@ -1,5 +1,5 @@
 use crate::{
-    abigen::{privacy_pools_garaga_pool::PrivacyPoolsGaragaPool, Erc20Reader},
+    abigen::{pool::Pool, Erc20Reader},
     circuit::{CircuitInputCreator, Commitment},
     merkle::{MerkleTree, RootMerkleTree},
     prover::Prover,
@@ -25,7 +25,7 @@ async fn test_contract_withdraw_simple() {
         pool_address,
         erc20_address,
     } = single_deploy_helper(&runner).await;
-    let pool = PrivacyPoolsGaragaPool::new(pool_address, prefunded_account.clone());
+    let pool = Pool::new(pool_address, prefunded_account.clone());
 
     let my_commitment = Commitment::new(12345u32, 54321u32, 100u32);
 
@@ -121,7 +121,7 @@ async fn test_contract_withdraw_nullifier() {
         pool_address,
         erc20_address,
     } = single_deploy_helper(&runner).await;
-    let pool = PrivacyPoolsGaragaPool::new(pool_address, prefunded_account.clone());
+    let pool = Pool::new(pool_address, prefunded_account.clone());
 
     let my_commitment = Commitment::new(12345u32, 54321u32, 100u32);
 
@@ -205,7 +205,7 @@ async fn test_contract_withdraw_refund() {
         pool_address,
         erc20_address,
     } = single_deploy_helper(&runner).await;
-    let pool = PrivacyPoolsGaragaPool::new(pool_address, prefunded_account.clone());
+    let pool = Pool::new(pool_address, prefunded_account.clone());
 
     let my_commitment = Commitment::new(12345u32, 54321u32, 100u32);
 
@@ -351,7 +351,7 @@ async fn test_contract_withdraw_insufficient_fee_panic() {
         pool_address,
         erc20_address,
     } = single_deploy_helper_with_min_fee(&runner, 20u32).await;
-    let pool = PrivacyPoolsGaragaPool::new(pool_address, prefunded_account.clone());
+    let pool = Pool::new(pool_address, prefunded_account.clone());
 
     let my_commitment = Commitment::new(12345u32, 54321u32, 100u32);
 
@@ -448,7 +448,7 @@ async fn test_contract_withdraw_wrong_root_panic() {
         pool_address,
         erc20_address,
     } = single_deploy_helper(&runner).await;
-    let pool = PrivacyPoolsGaragaPool::new(pool_address, prefunded_account.clone());
+    let pool = Pool::new(pool_address, prefunded_account.clone());
 
     let my_commitment = Commitment::new(12345u32, 54321u32, 100u32);
 
@@ -519,7 +519,7 @@ async fn test_contract_withdraw_old_root() {
         pool_address,
         erc20_address,
     } = single_deploy_helper(&runner).await;
-    let pool = PrivacyPoolsGaragaPool::new(pool_address, prefunded_account.clone());
+    let pool = Pool::new(pool_address, prefunded_account.clone());
 
     let my_commitment = Commitment::new(12345u32, 54321u32, 100u32);
 

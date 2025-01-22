@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use crate::{
-    abigen::privacy_pools_garaga_groth_16_verifierbn_254::PrivacyPoolsGaragaGroth16verifierbn254Reader,
+    abigen::verifier::Groth16VerifierBN254Reader,
     circuit::{CircuitInputCreator, Commitment},
     deploy_declare::PoolContractDeployer,
     merkle::{MerkleTree, RootMerkleTree},
@@ -22,10 +22,7 @@ async fn test_verifier() {
         .deploy_verifier_contract()
         .await;
 
-    let verifier = PrivacyPoolsGaragaGroth16verifierbn254Reader::new(
-        deployer.verifier_address(),
-        runner.client(),
-    );
+    let verifier = Groth16VerifierBN254Reader::new(deployer.verifier_address(), runner.client());
 
     let my_commitment = Commitment::new(12345u32, 54321u32, 42u32);
 

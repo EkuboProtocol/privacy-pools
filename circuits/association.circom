@@ -17,7 +17,7 @@ template CommitmentHasher() {
 }
 
 // Verifies that commitment that corresponds to given secret and nullifier is included in the merkle tree of deposits
-template Withdraw(levels) {
+template AssociationChecker(levels) {
     signal input root;
     signal input nullifierHash;
     signal input recipient; // not taking part in any computations

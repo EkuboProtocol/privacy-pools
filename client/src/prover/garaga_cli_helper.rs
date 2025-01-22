@@ -34,6 +34,7 @@ impl GaragaCliHelper {
     }
     pub fn save_input(&self, input: CircuitInput) {
         let path = self.witness_dir().join(&self.input_path);
+        tracing::info!("path: {:?}", path);
         std::fs::File::create(path)
             .unwrap()
             .write_all(serde_json::to_string_pretty(&input).unwrap().as_bytes())
@@ -62,6 +63,7 @@ impl GaragaCliHelper {
             ))
             .output()
             .unwrap();
+        tracing::info!("output: {}", String::from_utf8(output.stderr.clone()).unwrap());
         assert!(output.status.success());
         assert_eq!(output.status.code(), Some(0));
         assert!(output.stderr.is_empty());
