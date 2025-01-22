@@ -1,13 +1,15 @@
 use crate::{
     abigen::pool::{Pool, PoolReader},
     circuit::Commitment,
-    merkle::{MerkleTree, RootMerkleTree},
     testnet::runner::KatanaRunner,
     tests::{approve_helper, single_deploy_helper, DeployHelperResult},
     transaction_waiter::TransactionWaiter,
 };
 use cainome::cairo_serde::U256;
+use merkle::{hybrid::HybridMerkleTree, traits::RootMerkleTree};
 use starknet_crypto::Felt;
+
+type MerkleTree = HybridMerkleTree;
 
 #[tokio::test]
 async fn test_contract_merkle_tree_empty() {

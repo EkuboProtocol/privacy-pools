@@ -12,7 +12,6 @@ use starknet::StarkNet;
 use tokio::{net::TcpListener, sync::Mutex};
 use tracing::Level;
 
-mod abigen;
 mod deposit;
 mod shutdown;
 mod starknet;

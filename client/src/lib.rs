@@ -4,8 +4,6 @@ pub mod circuit;
 
 pub mod deploy_declare;
 pub mod execution_prepare;
-pub mod hash;
-pub mod merkle;
 pub mod prover;
 pub mod testnet;
 pub mod transaction_waiter;

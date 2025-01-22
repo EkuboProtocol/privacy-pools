@@ -2,10 +2,12 @@ use std::str::FromStr;
 
 use crate::{
     circuit::{CircuitInputCreator, Commitment},
-    merkle::{MerkleTree, RootMerkleTree},
     prover::Prover,
 };
 use cainome::cairo_serde::U256;
+use merkle::{hybrid::HybridMerkleTree, traits::RootMerkleTree};
+
+type MerkleTree = HybridMerkleTree;
 
 #[tokio::test]
 async fn test_prover_basic() {

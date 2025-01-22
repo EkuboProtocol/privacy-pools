@@ -4,11 +4,13 @@ use crate::{
     abigen::verifier::Groth16VerifierBN254Reader,
     circuit::{CircuitInputCreator, Commitment},
     deploy_declare::PoolContractDeployer,
-    merkle::{MerkleTree, RootMerkleTree},
     prover::Prover,
     testnet::runner::KatanaRunner,
 };
 use cainome::cairo_serde::U256;
+use merkle::{hybrid::HybridMerkleTree, traits::RootMerkleTree};
+
+type MerkleTree = HybridMerkleTree;
 
 #[tokio::test]
 async fn test_verifier() {

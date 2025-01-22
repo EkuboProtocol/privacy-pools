@@ -2,7 +2,7 @@ use cainome::cairo_serde::U256;
 
 use crate::structs::MerklePath;
 
-pub const CONTRACT_MERKLE_TREE_HEIGHT: usize = 17;
+pub const CONTRACT_MERKLE_TREE_HEIGHT: usize = 25;
 
 pub trait RootMerkleTree {
     fn new(height: usize) -> Self

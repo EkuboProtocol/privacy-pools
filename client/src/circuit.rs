@@ -1,15 +1,15 @@
 use std::str::FromStr;
 
-use crate::{
-    hash::{hash, hash_one},
-    merkle::{FindLeafMerkleTree, RootMerkleTree},
-};
-
 use cainome::cairo_serde::U256;
+use hash::{hash, hash_one};
+use merkle::{
+    hybrid::HybridMerkleTree,
+    traits::{FindLeafMerkleTree, RootMerkleTree},
+};
 use serde::{Deserialize, Serialize};
 use starknet_crypto::Felt;
 
-use crate::merkle::MerkleTree;
+type MerkleTree = HybridMerkleTree;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]

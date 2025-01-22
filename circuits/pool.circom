@@ -51,4 +51,4 @@ template Pool(levels, associatedSetLevels) {
     }
 }
 
-component main {public [root, nullifierHash, recipient, fee, amount, refundCommitmentHash, associatedSetRoot]} = Pool(16, 16);
+component main {public [root, nullifierHash, recipient, fee, amount, refundCommitmentHash, associatedSetRoot]} = Pool(24, 24);

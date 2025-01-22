@@ -1,7 +1,6 @@
 use crate::{
     abigen::{pool::Pool, Erc20Reader},
     circuit::{CircuitInputCreator, Commitment},
-    merkle::{MerkleTree, RootMerkleTree},
     prover::Prover,
     testnet::runner::KatanaRunner,
     tests::{
@@ -10,12 +9,15 @@ use crate::{
     transaction_waiter::TransactionWaiter,
 };
 use cainome::cairo_serde::U256;
+use merkle::{hybrid::HybridMerkleTree, traits::RootMerkleTree};
 use starknet::{
     accounts::AccountError,
     core::types::{StarknetError, TransactionExecutionErrorData},
     providers::ProviderError,
 };
 use starknet_crypto::Felt;
+
+type MerkleTree = HybridMerkleTree;
 
 #[tokio::test]
 async fn test_contract_withdraw_simple() {

@@ -1,9 +1,8 @@
+use client::abigen::pool::{Deposit, Event};
 use starknet::{
     core::types::{EmittedEvent, Felt, TransactionReceipt, TransactionReceiptWithBlockInfo},
     providers::{jsonrpc::HttpTransport, JsonRpcClient, Provider, ProviderError, Url},
 };
-
-use crate::abigen::pool::{Deposit, Event};
 
 #[derive(Debug, Clone)]
 pub struct StarkNet {
