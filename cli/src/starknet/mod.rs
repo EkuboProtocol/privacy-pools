@@ -1,6 +1,6 @@
 use cainome::cairo_serde::U256;
 use client::{
-    abigen::{pool::Pool, Erc20},
+    abigen::pool::Pool,
     circuit::Commitment,
     deploy_declare::{ERC20ContractDeployer, PoolContractDeployer},
     transaction_waiter::TransactionWaiter,
@@ -31,29 +31,6 @@ pub async fn single_deploy_helper_with_min_fee(
         .await
         .deploy_pool_contract(erc20_address, min_fee)
         .await;
-}
-
-pub async fn approve_helper(
-    account: SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet>,
-    address: Felt,
-    spender: impl Into<Felt>,
-    amount: impl Into<U256>,
-) {
-    let erc20 = Erc20::new(address, account.clone());
-    let tx = erc20
-        .approve(
-            &spender.into().into(),
-            &U256::from_bytes_be(&amount.into().to_bytes_be()),
-        )
-        .send()
-        .await
-        .unwrap();
-    let tx_receipt = TransactionWaiter::new(tx.transaction_hash, account.provider())
-        .wait()
-        .await
-        .unwrap();
-
-    tracing::info!("tx receipt: {:?}", tx_receipt);
 }
 
 pub async fn deposit(

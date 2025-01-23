@@ -13,7 +13,7 @@ use client::{
     transaction_waiter::TransactionWaiter,
 };
 use serde::{Deserialize, Serialize};
-use starknet::{approve_helper, deposit, single_deploy_helper_with_min_fee};
+use starknet::{deposit, single_deploy_helper_with_min_fee};
 
 use tracing::Level;
 
@@ -57,17 +57,6 @@ enum Commands {
         /// Contract address to deploy
         #[arg(long, short)]
         min_fee: u32,
-    },
-    /// Approve tokens
-    Approve {
-        #[arg(long)]
-        token_address: Felt,
-
-        #[arg(long)]
-        spender: Felt,
-
-        #[arg(long)]
-        amount: U256,
     },
     /// Deposit funds
     Deposit {
@@ -137,13 +126,6 @@ async fn main() {
     match args.command {
         Commands::Deploy { min_fee } => {
             single_deploy_helper_with_min_fee(account, min_fee).await;
-        }
-        Commands::Approve {
-            token_address,
-            spender,
-            amount,
-        } => {
-            approve_helper(account, token_address, spender, amount).await;
         }
         Commands::Deposit {
             pool_address,

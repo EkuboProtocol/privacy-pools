@@ -93,23 +93,23 @@ impl GaragaCliHelper {
         self.dir.join(format!("{}_js", self.circuit_name))
     }
     fn run_calldata_command(&self) -> Output {
+        let proof_path = PathBuf::new().join("../target").join(&self.proof_path);
+        let public_inputs_path = PathBuf::new()
+            .join("../target")
+            .join(&self.public_inputs_path);
         let output = Command::new("garaga")
             .arg("calldata")
             .arg("--vk")
             .arg(&self.vk_path)
             .arg("--proof")
-            .arg(PathBuf::new().join("../target").join(&self.proof_path))
+            .arg(proof_path)
             .arg("--public-inputs")
-            .arg(
-                PathBuf::new()
-                    .join("../target")
-                    .join(&self.public_inputs_path),
-            )
+            .arg(public_inputs_path)
             .arg("--system")
             .arg("groth16")
             .current_dir(&self.dir)
             .output()
-            .unwrap();
+            .expect("check if garaga is installed");
         if !output.stderr.is_empty() {
             println!(
                 "Standard Output: {}",
