@@ -42,7 +42,7 @@ async fn test_verifier() {
         U256::from_str("0x111111").unwrap(),
     ];
 
-    let proof = Prover::new()
+    let proof = Prover::new("../target")
         .get_calldata(
             CircuitInputCreator::new(
                 my_commitment.clone(),

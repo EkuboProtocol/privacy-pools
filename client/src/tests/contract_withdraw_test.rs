@@ -88,7 +88,9 @@ async fn test_contract_withdraw_simple() {
         2u32,
     );
 
-    let proof = Prover::new().get_calldata(input_creator.create()).await;
+    let proof = Prover::new("../target")
+        .get_calldata(input_creator.create())
+        .await;
 
     let tx = pool.withdraw(&proof).send().await.unwrap();
 
@@ -175,7 +177,9 @@ async fn test_contract_withdraw_nullifier() {
         2u32,
     );
 
-    let proof = Prover::new().get_calldata(input_creator.create()).await;
+    let proof = Prover::new("../target")
+        .get_calldata(input_creator.create())
+        .await;
 
     let tx = pool.withdraw(&proof).send().await.unwrap();
 
@@ -270,7 +274,7 @@ async fn test_contract_withdraw_refund() {
 
     let refund_commitment = Commitment::new(98765u32, 123334u32, 20u32);
 
-    let proof = Prover::new()
+    let proof = Prover::new("../target")
         .get_calldata(input_creator.create_with_refund(&refund_commitment))
         .await;
 
@@ -316,7 +320,9 @@ async fn test_contract_withdraw_refund() {
         2u32,
     );
 
-    let proof = Prover::new().get_calldata(input_creator.create()).await;
+    let proof = Prover::new("../target")
+        .get_calldata(input_creator.create())
+        .await;
 
     let tx = pool.withdraw(&proof).send().await.unwrap();
 
@@ -414,7 +420,9 @@ async fn test_contract_withdraw_insufficient_fee_panic() {
         19u32,
     );
 
-    let proof = Prover::new().get_calldata(input_creator.create()).await;
+    let proof = Prover::new("../target")
+        .get_calldata(input_creator.create())
+        .await;
 
     let tx = pool.withdraw(&proof).send().await.unwrap();
 
@@ -503,7 +511,9 @@ async fn test_contract_withdraw_wrong_root_panic() {
         19u32,
     );
 
-    let proof = Prover::new().get_calldata(input_creator.create()).await;
+    let proof = Prover::new("../target")
+        .get_calldata(input_creator.create())
+        .await;
 
     let tx = pool.withdraw(&proof).send().await.unwrap();
 
@@ -575,7 +585,9 @@ async fn test_contract_withdraw_old_root() {
         19u32,
     );
 
-    let proof = Prover::new().get_calldata(input_creator.create()).await;
+    let proof = Prover::new("../target")
+        .get_calldata(input_creator.create())
+        .await;
 
     let tx = pool.withdraw(&proof).send().await.unwrap();
 

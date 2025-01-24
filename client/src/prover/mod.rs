@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use starknet_crypto::Felt;
 use tokio::sync::Mutex;
 mod garaga_cli_helper;
@@ -17,14 +19,14 @@ pub struct Prover {
 
 impl Default for Prover {
     fn default() -> Self {
-        Self::new()
+        Self::new("./target")
     }
 }
 
 impl Prover {
-    pub fn new() -> Self {
+    pub fn new(dir: impl Into<PathBuf>) -> Self {
         Self {
-            cli: GaragaCliHelper::new("../target", "pool", "../target/verification_key.json"),
+            cli: GaragaCliHelper::new(dir, "pool", "verification_key.json"),
         }
     }
     pub async fn get_calldata(&self, input: CircuitInput) -> Vec<Felt> {

@@ -13,7 +13,7 @@ use client::{
     transaction_waiter::TransactionWaiter,
 };
 use serde::{Deserialize, Serialize};
-use starknet::{deposit, single_deploy_helper_with_min_fee};
+use starknet::deposit;
 
 use tracing::Level;
 
@@ -52,12 +52,6 @@ struct Args {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    /// Deploy a contract
-    Deploy {
-        /// Contract address to deploy
-        #[arg(long, short)]
-        min_fee: u32,
-    },
     /// Deposit funds
     Deposit {
         #[arg(long)]
@@ -124,9 +118,6 @@ async fn main() {
     );
 
     match args.command {
-        Commands::Deploy { min_fee } => {
-            single_deploy_helper_with_min_fee(account, min_fee).await;
-        }
         Commands::Deposit {
             pool_address,
             secret,
@@ -214,7 +205,7 @@ async fn main() {
                     .collect(),
             };
 
-            let proof = Prover::new().get_calldata(circuit_input).await;
+            let proof = Prover::new("./target").get_calldata(circuit_input).await;
             tracing::info!("calldata len: {}", proof.len());
 
             let pool = Pool::new(pool_address, account.clone());

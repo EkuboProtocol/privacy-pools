@@ -43,25 +43,29 @@ impl GaragaCliHelper {
         self.convert_call_data_output(self.run_calldata_command())
     }
     pub fn generate_witness(&self) {
+        let generator_path = PathBuf::new()
+            .join(self.dir.to_owned())
+            .join(format!("{}_js/generate_witness.js", self.circuit_name));
+        let wasm_path = PathBuf::new().join(self.dir.to_owned()).join(format!(
+            "{}_js/{}.wasm",
+            self.circuit_name, self.circuit_name
+        ));
+        let input_path = PathBuf::new()
+            .join(self.dir.to_owned())
+            .join(format!("{}_js/input_generated.json", self.circuit_name));
+        let witness_path = PathBuf::new().join(self.dir.to_owned()).join(format!(
+            "{}_js/{}.wtns",
+            self.circuit_name, self.circuit_name
+        ));
+
         let output = Command::new("node")
-            .arg(format!(
-                "../target/{}_js/generate_witness.js",
-                self.circuit_name
-            ))
-            .arg(format!(
-                "../target/{}_js/{}.wasm",
-                self.circuit_name, self.circuit_name
-            ))
-            .arg(format!(
-                "../target/{}_js/input_generated.json",
-                self.circuit_name
-            ))
-            .arg(format!(
-                "../target/{}_js/{}.wtns",
-                self.circuit_name, self.circuit_name
-            ))
+            .arg(generator_path)
+            .arg(wasm_path)
+            .arg(input_path)
+            .arg(witness_path)
             .output()
             .unwrap();
+        tracing::info!("{}", String::from_utf8(output.stderr.to_owned()).unwrap());
         assert!(output.status.success());
         assert_eq!(output.status.code(), Some(0));
         assert!(output.stderr.is_empty());
@@ -69,11 +73,11 @@ impl GaragaCliHelper {
     }
     pub fn run_prove(&self) {
         let output = Command::new("npx")
-            .arg("snarkjs@latest")
+            .arg("snarkjs")
             .arg("groth16")
             .arg("prove")
-            .arg(format!("../target/{}_0001.zkey", self.circuit_name))
-            .arg(format!("../target/{}_js/pool.wtns", self.circuit_name))
+            .arg(format!("{}_0001.zkey", self.circuit_name))
+            .arg(format!("{}_js/pool.wtns", self.circuit_name))
             .arg(&self.proof_path)
             .arg(&self.public_inputs_path)
             .current_dir(&self.dir)
@@ -93,18 +97,14 @@ impl GaragaCliHelper {
         self.dir.join(format!("{}_js", self.circuit_name))
     }
     fn run_calldata_command(&self) -> Output {
-        let proof_path = PathBuf::new().join("../target").join(&self.proof_path);
-        let public_inputs_path = PathBuf::new()
-            .join("../target")
-            .join(&self.public_inputs_path);
         let output = Command::new("garaga")
             .arg("calldata")
             .arg("--vk")
             .arg(&self.vk_path)
             .arg("--proof")
-            .arg(proof_path)
+            .arg(&self.proof_path)
             .arg("--public-inputs")
-            .arg(public_inputs_path)
+            .arg(&self.public_inputs_path)
             .arg("--system")
             .arg("groth16")
             .current_dir(&self.dir)

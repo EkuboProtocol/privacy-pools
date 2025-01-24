@@ -27,7 +27,7 @@ async fn test_prover_basic() {
         U256::from_str("0x111111").unwrap(),
     ];
 
-    Prover::new()
+    Prover::new("../target")
         .get_calldata(
             CircuitInputCreator::new(
                 my_commitment.clone(),
@@ -60,7 +60,7 @@ async fn test_prover_refund_greater_than_amount() {
         U256::from_str("0x111111").unwrap(),
     ];
 
-    Prover::new()
+    Prover::new("../target")
         .get_calldata(
             CircuitInputCreator::new(
                 my_commitment.clone(),
@@ -93,7 +93,7 @@ async fn test_prover_fee_greater_than_amount() {
         U256::from_str("0x111111").unwrap(),
     ];
 
-    Prover::new()
+    Prover::new("../target")
         .get_calldata(
             CircuitInputCreator::new(
                 my_commitment.clone(),

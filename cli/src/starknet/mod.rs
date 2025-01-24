@@ -1,37 +1,11 @@
 use cainome::cairo_serde::U256;
-use client::{
-    abigen::pool::Pool,
-    circuit::Commitment,
-    deploy_declare::{ERC20ContractDeployer, PoolContractDeployer},
-    transaction_waiter::TransactionWaiter,
-};
+use client::{abigen::pool::Pool, circuit::Commitment, transaction_waiter::TransactionWaiter};
 use starknet::{
     accounts::{ConnectedAccount, SingleOwnerAccount},
     core::types::Felt,
     providers::{jsonrpc::HttpTransport, JsonRpcClient},
     signers::LocalWallet,
 };
-
-pub async fn single_deploy_helper_with_min_fee(
-    account: SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet>,
-    min_fee: impl Into<U256>,
-) {
-    let erc20_address = ERC20ContractDeployer::new(&account, account.provider())
-        .declare_erc20_contract()
-        .await
-        .deploy_erc20_contract()
-        .await
-        .address();
-    PoolContractDeployer::new(&account, account.provider())
-        .declare_pool_contract()
-        .await
-        .declare_verifier_contract()
-        .await
-        .deploy_verifier_contract()
-        .await
-        .deploy_pool_contract(erc20_address, min_fee)
-        .await;
-}
 
 pub async fn deposit(
     account: SingleOwnerAccount<&JsonRpcClient<HttpTransport>, LocalWallet>,
