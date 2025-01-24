@@ -98,7 +98,7 @@ To demonstrate the functionality, follow these steps:
      ```
    - Withdraw funds:
      ```bash
-     cargo run -p cli -- withdraw --pool-address <pool-address> --secret <secret> --nullifier <nullifier> --amount <amount> --recipient <recipient-address>
+     cargo run -p cli -- withdraw --pool-address <pool-address> --secret <secret> --nullifier <nullifier> --amount <amount> --refund-secret <refund-secret> --refund-nullifier <refund-nullifier> --refund-amount <refund-amount> --recipient <recipient-address> --merkle-tree-root <merkle-tree-root> --fee <fee>
      ```
    - Query balance:
      ```bash
