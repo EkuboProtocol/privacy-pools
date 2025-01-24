@@ -22,7 +22,7 @@ The following tools and versions are required:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/EkuboProtocol/privacy-pools.git
+   git clone git@github.com:EkuboProtocol/privacy-pools.git
    cd privacy-pools
    ```
 
