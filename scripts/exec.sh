@@ -4,10 +4,6 @@ set -euxo pipefail
 
 starknet-devnet --seed 0
 
-source .venv/bin/activate
-pip install -r requirements.txt
-cd cli
-
 sncast declare --contract-name ERC20Upgradeable
 sncast declare --contract-name UniversalECIP
 sncast declare --contract-name Groth16VerifierBN254

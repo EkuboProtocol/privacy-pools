@@ -12,9 +12,7 @@ npx snarkjs groth16 setup target/pool.r1cs target/pot16_final.ptau target/pool_0
 npx snarkjs zkey contribute target/pool_0000.zkey target/pool_0001.zkey --name="1st Contributor Name"
 npx snarkjs zkey export verificationkey target/pool_0001.zkey target/verification_key.json
 npx snarkjs zkey export solidityverifier target/pool_0001.zkey target/verifier.sol
-source .venv/bin/activate
 garaga gen --project-name verifier --system groth16 --vk target/verification_key.json
-deactivate
 cp verifier/src/groth16_verifier_constants.cairo pool/src/verifier/groth16_verifier_constants.cairo
 # cp verifier/src/groth16_verifier.cairo pool/src/verifier/groth16_verifier.cairo
 # add pub to trait IGroth16VerifierBN254<TContractState> in pool/src/verifier/groth16_verifier.cairo
