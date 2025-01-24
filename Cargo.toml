@@ -1,6 +1,13 @@
 [workspace]
 resolver = "2"
-members = ["asp", "cli", "client", "crates/hash", "crates/merkle"]
+members = [
+    "asp",
+    "cli",
+    "client",
+    "crates/hash",
+    "crates/merkle",
+    "crates/starknet-pool-account",
+]
 
 [workspace.package]
 version = "0.1.0"
