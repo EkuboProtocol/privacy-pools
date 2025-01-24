@@ -1,4 +1,3 @@
-
 # Privacy Pools
 
 This repository implements a privacy pool based on the [Privacy Pools Paper](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4563364). The project leverages Circom circuits, Starknet, and Groth16 for zero-knowledge proof-based transactions, offering private and anonymous financial operations.
@@ -10,7 +9,9 @@ This repository implements a privacy pool based on the [Privacy Pools Paper](htt
 This repository uses [`asdf`](https://asdf-vm.com) for managing tool versions. Ensure you have `asdf` installed before proceeding.
 
 ### Tool Versions
+
 The following tools and versions are required:
+
 - **Python**: 3.10.16
 - **Node.js**: 23.5.0
 - **Scarb**: 2.9.1
@@ -21,17 +22,20 @@ The following tools and versions are required:
 ## Setup Instructions
 
 1. Clone the repository:
+
    ```bash
    git clone git@github.com:EkuboProtocol/privacy-pools.git
    cd privacy-pools
    ```
 
 2. Install dependencies using `asdf`:
+
    ```bash
    asdf install
    ```
 
 3. Set up the Python environment:
+
    ```bash
    python -m venv .venv
    source .venv/bin/activate
@@ -39,12 +43,14 @@ The following tools and versions are required:
    ```
 
 4. Compile the Circom circuit:
+
    ```bash
    mkdir -p target
    circom circuits/pool.circom --r1cs --wasm --sym --c --output target
    ```
 
 5. Generate trusted setup and keys:
+
    ```bash
    npx snarkjs powersoftau new bn128 16 target/pot16_0000.ptau
    npx snarkjs powersoftau contribute target/pot16_0000.ptau target/pot16_0001.ptau --name="First contribution"
@@ -56,14 +62,21 @@ The following tools and versions are required:
    ```
 
 6. Generate verifier constants and integrate:
+
    ```bash
    garaga gen --project-name verifier --system groth16 --vk target/verification_key.json
    cp verifier/src/groth16_verifier_constants.cairo pool/src/verifier/groth16_verifier_constants.cairo
    ```
 
 7. Build the project:
+
    ```bash
    scarb build
+   ```
+
+8. Run tests:
+   ```bash
+   cargo test
    ```
 
 ---
@@ -73,11 +86,13 @@ The following tools and versions are required:
 To demonstrate the functionality, follow these steps:
 
 1. Start a local Starknet development environment:
+
    ```bash
    starknet-devnet --seed 0
    ```
 
 2. Declare and deploy contracts:
+
    ```bash
    sncast declare --contract-name ERC20Upgradeable
    sncast declare --contract-name UniversalECIP
@@ -88,9 +103,14 @@ To demonstrate the functionality, follow these steps:
    ```
 
 3. Perform operations:
+
    - Approve token transfers:
      ```bash
      sncast invoke --contract-address <address> --function approve --calldata <calldata>
+     ```
+   - Run Association Set Provider:
+     ```bash
+     cargo run -p asp -- --contract-address <pool-address>
      ```
    - Deposit funds:
      ```bash
