@@ -10,7 +10,7 @@ trait IPool<TContractState> {
 }
 
 #[derive(Drop)]
-struct PublicOutput {
+struct PublicInput {
     root: u256,
     nullifier_hash: u256,
     recipient: ContractAddress,
@@ -21,10 +21,10 @@ struct PublicOutput {
 }
 
 #[generate_trait]
-impl PublicOutputImpl of PublicOutputTrait {
-    fn from_u256_span(span: Span<u256>) -> PublicOutput {
+impl PublicInputImpl of PublicInputTrait {
+    fn from_u256_span(span: Span<u256>) -> PublicInput {
         let recipient: felt252 = (*span[2]).try_into().unwrap();
-        PublicOutput {
+        PublicInput {
             root: *span[0],
             nullifier_hash: *span[1],
             recipient: recipient.try_into().unwrap(),
@@ -43,15 +43,14 @@ mod Pool {
         token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait},
     };
     use starknet::{
-        ContractAddress, get_caller_address, get_contract_address,
+        ContractAddress, get_caller_address, get_contract_address, event::EventEmitter,
         storage::{
             Map, StoragePathEntry, StoragePointerWriteAccess, StorageMapReadAccess,
             StoragePointerReadAccess,
         },
     };
-    use starknet::event::EventEmitter;
 
-    use super::PublicOutputImpl;
+    use super::PublicInputImpl;
     use crate::hash;
     use crate::merkle::{MerkleTreeComponent, MerkleTreeComponent::InternalTrait};
     use crate::verifier::groth16_verifier::{
@@ -69,7 +68,7 @@ mod Pool {
     #[storage]
     struct Storage {
         pub token: IERC20Dispatcher,
-        pub verifier: IGroth16VerifierBN254Dispatcher,
+        pub verifier: ContractAddress,
         pub nullifier_hashes: Map<u256, bool>,
         pub min_fee: u256,
         pub total_fee: u256,
@@ -135,7 +134,7 @@ mod Pool {
     ) {
         self.ownable.initializer(owner);
         self.token.write(IERC20Dispatcher { contract_address: token });
-        self.verifier.write(IGroth16VerifierBN254Dispatcher { contract_address: verifier });
+        self.verifier.write(verifier);
         self.merkle.initializer();
         self.min_fee.write(min_fee);
         self.total_fee.write(0);
@@ -155,44 +154,42 @@ mod Pool {
         }
 
         fn withdraw(ref self: ContractState, proof: Span<felt252>) -> bool {
-            let verifier_address: ContractAddress = self.verifier.read().contract_address;
+            let verifier_address: ContractAddress = self.verifier.read();
 
-            let public_output = IGroth16VerifierBN254Dispatcher {
+            let public_input_serialized = IGroth16VerifierBN254Dispatcher {
                 contract_address: verifier_address,
             }
                 .verify_groth16_proof_bn254(proof)
                 .expect(Errors::INVALID_PROOF);
 
-            let public_output = PublicOutputImpl::from_u256_span(public_output);
+            let public_input = PublicInputImpl::from_u256_span(public_input_serialized);
             assert(
-                self.nullifier_hashes.read(public_output.nullifier_hash) == false,
+                self.nullifier_hashes.read(public_input.nullifier_hash) == false,
                 Errors::NULLIFIER_ALREADY_USED,
             );
-            self.nullifier_hashes.entry(public_output.nullifier_hash).write(true);
+            self.nullifier_hashes.entry(public_input.nullifier_hash).write(true);
 
-            assert(self.merkle.roots.read(public_output.root) == true, Errors::INVALID_ROOT);
+            assert(self.merkle.roots.read(public_input.root) == true, Errors::INVALID_ROOT);
 
             let min_fee: u256 = self.min_fee.read().into();
-            assert(min_fee <= public_output.fee.into(), Errors::INSUFFICIENT_FEE);
-            self.total_fee.write(self.total_fee.read() + public_output.fee);
+            assert(min_fee <= public_input.fee.into(), Errors::INSUFFICIENT_FEE);
+            self.total_fee.write(self.total_fee.read() + public_input.fee);
 
             self
                 .token
                 .read()
-                .transfer(
-                    public_output.recipient, (public_output.amount - public_output.fee).into(),
-                );
+                .transfer(public_input.recipient, (public_input.amount - public_input.fee).into());
 
-            self.merkle.add_leaf(public_output.refund_commitment_hash);
+            self.merkle.add_leaf(public_input.refund_commitment_hash);
 
             let caller = get_caller_address();
             self
                 .emit(
                     Withdrawal {
                         caller,
-                        recipient: public_output.recipient,
-                        amount: public_output.amount,
-                        associated_set_root: public_output.associated_set_root,
+                        recipient: public_input.recipient,
+                        amount: public_input.amount,
+                        associated_set_root: public_input.associated_set_root,
                     },
                 );
 

@@ -12,6 +12,7 @@ use starknet_crypto::Felt;
 mod contract_deposit_test;
 mod contract_withdraw_test;
 mod deployment_test;
+// mod pool_account_test;
 mod prover_test;
 mod verifier_test;
 
