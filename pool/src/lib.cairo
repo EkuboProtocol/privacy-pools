@@ -1,3 +1,4 @@
+mod account;
 mod ecip;
 mod merkle;
 mod pool;

@@ -1,0 +1,6 @@
+[package]
+name = "starknet-pool-account"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
