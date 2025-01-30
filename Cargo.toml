@@ -26,14 +26,13 @@ hash = { path = "./crates/hash" }
 lazy_static = "1.5.0"
 merkle = { path = "./crates/merkle" }
 num-bigint = { version = "0.4.6", features = ["serde"] }
+openrpc-testgen = { git = "https://github.com/neotheprogramist/starknet-hive.git", rev = "256b794dc3575f8fc580bf0c7d959ca156740e3b" }
 prefix-hex = "0.7.1"
 reqwest = { version = "0.12.12", features = ["json"] }
 serde = { version = "1.0.217", features = ["derive"] }
-serde_json = "1.0.137"
+serde_json = "1.0.138"
 starknet = "0.13.0"
 starknet-crypto = "0.7.4"
-starknet-types-core = { version = "0.1.7", features = ["curve", "hash"] }
-starknet-types-rpc = { git = "https://github.com/neotheprogramist/types-rs.git", rev = "3ee4325a72481e526b7c4fa0592ad822a391658b" }
 thiserror = "2.0.11"
 tokio = { version = "1.43.0", features = [
     "macros",

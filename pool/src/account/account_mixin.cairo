@@ -1,62 +1,23 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts for Cairo v0.20.0 (account/account.cairo)
-use starknet::ContractAddress;
-
-#[derive(Drop)]
-pub struct PublicInput {
-    root: u256,
-    nullifier_hash: u256,
-    recipient: ContractAddress,
-    fee: u256,
-    refund_commitment_hash: u256,
-    amount: u256,
-    associated_set_root: u256,
-}
-
-#[generate_trait]
-pub impl PublicInputImpl of PublicInputTrait {
-    fn from_u256_span(span: Span<u256>) -> PublicInput {
-        let recipient: felt252 = (*span[2]).try_into().unwrap();
-        PublicInput {
-            root: *span[0],
-            nullifier_hash: *span[1],
-            recipient: recipient.try_into().unwrap(),
-            fee: *span[3],
-            refund_commitment_hash: *span[4],
-            amount: *span[5],
-            associated_set_root: *span[6],
-        }
-    }
-}
-
-#[starknet::interface]
-trait IPoolAccount<TContractState> {
-    fn deposit(ref self: TContractState, secret_and_nullifier_hash: u256, amount: u256) -> bool;
-    fn withdraw(ref self: TContractState, proof: Span<felt252>) -> bool;
-    fn withdraw_fee(ref self: TContractState, recipient: ContractAddress, amount: u256) -> bool;
-
-    fn current_root(self: @TContractState) -> u256;
-}
 
 /// # Account Component
 ///
 /// The Account component enables contracts to behave as accounts.
 #[starknet::component]
-pub mod PoolAccountComponent {
-    use starknet::SyscallResultTrait;
+pub mod AccountComponent {
     use core::hash::{HashStateExTrait, HashStateTrait};
     use core::num::traits::Zero;
     use core::poseidon::PoseidonTrait;
     use openzeppelin::account::interface;
-    use openzeppelin::account::utils::{is_tx_version_valid, is_valid_stark_signature};
+    use openzeppelin::account::utils::{
+        execute_calls, is_tx_version_valid, is_valid_stark_signature,
+    };
     use openzeppelin::introspection::src5::SRC5Component;
     use openzeppelin::introspection::src5::SRC5Component::InternalTrait as SRC5InternalTrait;
     use openzeppelin::introspection::src5::SRC5Component::SRC5Impl;
-    use starknet::{account::Call, get_execution_info};
+    use starknet::account::Call;
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
-
-    use super::{PublicInput, PublicInputImpl};
-    use crate::hash;
 
     #[storage]
     pub struct Storage {
@@ -89,9 +50,6 @@ pub mod PoolAccountComponent {
         pub const UNAUTHORIZED: felt252 = 'Account: unauthorized';
     }
 
-    const VERIFIER_CLASS_HASH: felt252 =
-        0x0260c274f472d42fbda9beef7752d1dfa278a197be04a1e1103b4223bdd51264;
-
     //
     // External
     //
@@ -119,29 +77,7 @@ pub mod PoolAccountComponent {
             assert(sender.is_zero(), Errors::INVALID_CALLER);
             assert(is_tx_version_valid(), Errors::INVALID_TX_VERSION);
 
-            let exec_info = get_execution_info().unbox();
-            let tx_info = exec_info.tx_info.unbox();
-            let signature = tx_info.signature;
-
-            let mut verifier_result_serialized = core::starknet::syscalls::library_call_syscall(
-                VERIFIER_CLASS_HASH.try_into().unwrap(),
-                selector!("verify_groth16_proof_bn254"),
-                signature,
-            )
-                .unwrap_syscall();
-            let verifier_result = Serde::<
-                Option<Span<u256>>,
-            >::deserialize(ref verifier_result_serialized)
-                .unwrap();
-
-            if let Option::Some(public_output_serialized) = verifier_result {
-                let public_output = PublicInputImpl::from_u256_span(public_output_serialized);
-                starknet::VALIDATED;
-            } else {
-                panic(array!['account/verification-failed']);
-            };
-
-            array![]
+            execute_calls(calls.span())
         }
 
         /// Verifies the validity of the signature for the current transaction.
@@ -154,17 +90,7 @@ pub mod PoolAccountComponent {
         fn is_valid_signature(
             self: @ComponentState<TContractState>, hash: felt252, signature: Array<felt252>,
         ) -> felt252 {
-            let mut verifier_result_serialized = core::starknet::syscalls::library_call_syscall(
-                VERIFIER_CLASS_HASH.try_into().unwrap(),
-                selector!("verify_groth16_proof_bn254"),
-                signature.span(),
-            )
-                .unwrap_syscall();
-            let verifier_result = Serde::<
-                Option<Span<u256>>,
-            >::deserialize(ref verifier_result_serialized)
-                .unwrap();
-            if let Option::Some(_public_input) = verifier_result {
+            if self._is_valid_signature(hash, signature.span()) {
                 starknet::VALIDATED
             } else {
                 0
@@ -437,79 +363,8 @@ pub mod PoolAccountComponent {
         fn _is_valid_signature(
             self: @ComponentState<TContractState>, hash: felt252, signature: Span<felt252>,
         ) -> bool {
-            let mut verifier_result_serialized = core::starknet::syscalls::library_call_syscall(
-                VERIFIER_CLASS_HASH.try_into().unwrap(), selector!("msm_g1"), signature.span(),
-            )
-                .unwrap_syscall();
-            let verifier_result = Serde::<
-                Option<Span<u256>>,
-            >::deserialize(ref verifier_result_serialized)
-                .unwrap();
-            if let Option::Some(_public_input) = verifier_result {
-                true
-            } else {
-                false
-            }
-        }
-
-        fn deposit(ref self: ComponentState<TContractState>, secret_and_nullifier_hash: u256, amount: u256) -> bool {
-            let commitment_hash = hash(secret_and_nullifier_hash, amount);
-            self.merkle.add_leaf(commitment_hash);
-            let caller = get_caller_address();
-            let this = get_contract_address();
-            self.token.read().transfer_from(caller, this, amount.into());
-            self.emit(Deposit { caller, secret_and_nullifier_hash, amount });
-
-            true
-        }
-
-        fn withdraw(ref self: ComponentState<TContractState>, proof: Span<felt252>) -> bool {
-            let verifier_address: ContractAddress = self.verifier.read().contract_address;
-
-            let public_output = IGroth16VerifierBN254Dispatcher {
-                contract_address: verifier_address,
-            }
-                .verify_groth16_proof_bn254(proof)
-                .expect(Errors::INVALID_PROOF);
-
-            let public_output = PublicInputImpl::from_u256_span(public_output);
-            assert(
-                self.nullifier_hashes.read(public_output.nullifier_hash) == false,
-                Errors::NULLIFIER_ALREADY_USED,
-            );
-            self.nullifier_hashes.entry(public_output.nullifier_hash).write(true);
-
-            assert(self.merkle.roots.read(public_output.root) == true, Errors::INVALID_ROOT);
-
-            let min_fee: u256 = self.min_fee.read().into();
-            assert(min_fee <= public_output.fee.into(), Errors::INSUFFICIENT_FEE);
-            self.total_fee.write(self.total_fee.read() + public_output.fee);
-
-            self
-                .token
-                .read()
-                .transfer(
-                    public_output.recipient, (public_output.amount - public_output.fee).into(),
-                );
-
-            self.merkle.add_leaf(public_output.refund_commitment_hash);
-
-            let caller = get_caller_address();
-            self
-                .emit(
-                    Withdrawal {
-                        caller,
-                        recipient: public_output.recipient,
-                        amount: public_output.amount,
-                        associated_set_root: public_output.associated_set_root,
-                    },
-                );
-
-            true
-        }
-
-        fn current_root(self: @ComponentState<TContractState>) -> u256 {
-            self.merkle.root.read()
+            let public_key = self.Account_public_key.read();
+            is_valid_stark_signature(hash, public_key, signature)
         }
     }
 }
