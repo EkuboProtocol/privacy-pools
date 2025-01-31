@@ -120,16 +120,6 @@ async fn test_pool_account_simple() {
         deposit(&hive, pool_address, commitment).await;
     }
 
-    let tree = HybridMerkleTree::contract_height_with_leafs(
-        commitments.iter().map(Commitment::hash).collect(),
-    );
-    let associated_tree = HybridMerkleTree::contract_height_with_leafs(
-        associated_set_commitments
-            .iter()
-            .map(Commitment::hash)
-            .collect(),
-    );
-
     withdraw(
         &hive,
         pool_address,
