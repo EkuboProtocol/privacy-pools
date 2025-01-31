@@ -26,7 +26,7 @@ hash = { path = "./crates/hash" }
 lazy_static = "1.5.0"
 merkle = { path = "./crates/merkle" }
 num-bigint = { version = "0.4.6", features = ["serde"] }
-openrpc-testgen = { git = "https://github.com/neotheprogramist/starknet-hive.git", rev = "256b794dc3575f8fc580bf0c7d959ca156740e3b" }
+openrpc-testgen = { git = "https://github.com/neotheprogramist/starknet-hive.git", rev = "0741ae5f2cd73519931ec020a7b77e5420a6e0c4" }
 prefix-hex = "0.7.1"
 reqwest = { version = "0.12.12", features = ["json"] }
 serde = { version = "1.0.217", features = ["derive"] }

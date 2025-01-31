@@ -1,7 +1,15 @@
 use std::{fmt::Debug, str::FromStr};
 
-use crate::deploy_declare::declare::{ERC20_CASM_STR, ERC20_SIERRA_STR};
+use crate::{
+    circuit::{CircuitInputCreator, Commitment},
+    deploy_declare::declare::{
+        ERC20_CASM_STR, ERC20_SIERRA_STR, POOL_CASM_STR, POOL_SIERRA_STR, UNIVERSAL_ECIP_CASM_STR,
+        UNIVERSAL_ECIP_SIERRA_STR, VERIFIER_CASM_STR, VERIFIER_SIERRA_STR,
+    },
+    prover::Prover,
+};
 use cainome::cairo_serde::{ByteArray, CairoSerde, U256};
+use merkle::{hybrid::HybridMerkleTree, traits::RootMerkleTree};
 use openrpc_testgen::utils::{
     get_deployed_contract_address::get_contract_address,
     starknet_hive::StarknetHive,
@@ -44,7 +52,7 @@ async fn test_pool_account_simple() {
     .unwrap();
 
     let erc20_class_hash = declare(&hive, ERC20_SIERRA_STR, ERC20_CASM_STR).await;
-
+    dbg!(erc20_class_hash);
     let name = <ByteArray as CairoSerde>::cairo_serialize(&ByteArray {
         data: vec![],
         pending_word: Felt::ZERO,
@@ -55,7 +63,7 @@ async fn test_pool_account_simple() {
         pending_word: Felt::ZERO,
         pending_word_len: 0,
     });
-    let fixed_suply = <U256 as CairoSerde>::cairo_serialize(&U256::from_str("200000000").unwrap());
+    let fixed_suply = <U256 as CairoSerde>::cairo_serialize(&U256::from_str("1000000").unwrap());
     let recipient = hive.address();
     let owner = hive.address();
     let mut calldata = vec![];
@@ -67,42 +75,69 @@ async fn test_pool_account_simple() {
     let erc20_address = deploy(&hive, erc20_class_hash, calldata).await;
     dbg!(erc20_address);
 
-    let account2 = Felt::from_hex_unchecked(
-        "0x078662e7352d062084b0010068b99288486c2d8b914f6e2a55ce945f8792c8b1",
-    );
-    let transfer_call = Call {
-        to: erc20_address,
-        selector: get_selector_from_name("transfer").unwrap(),
-        calldata: vec![
-            account2,
-            Felt::from_dec_str("100").unwrap(),
+    let ecip_class_hash = declare(&hive, UNIVERSAL_ECIP_SIERRA_STR, UNIVERSAL_ECIP_CASM_STR).await;
+    dbg!(ecip_class_hash);
+    let verifier_class_hash = declare(&hive, VERIFIER_SIERRA_STR, VERIFIER_CASM_STR).await;
+    let verifier_address = deploy(&hive, verifier_class_hash, vec![]).await;
+    dbg!(verifier_address);
+    let pool_class_hash = declare(&hive, POOL_SIERRA_STR, POOL_CASM_STR).await;
+    let pool_address = deploy(
+        &hive,
+        pool_class_hash,
+        vec![
+            address,
+            erc20_address,
+            verifier_address,
+            Felt::from_dec_str("2").unwrap(),
             Felt::from_dec_str("0").unwrap(),
         ],
-    };
-    let prepared_execution_v3 = hive
-        .execute_v3(vec![transfer_call])
-        .prepare()
-        .await
-        .unwrap();
-
-    let signature = hive
-        .sign_execution_v3(prepared_execution_v3.get_raw_execution().await, false)
-        .await
-        .unwrap();
-
-    let invoke_result_custom_signature = prepared_execution_v3
-        .send_with_custom_signature(signature)
-        .await
-        .unwrap();
-
-    let tx = wait_for_sent_transaction(
-        invoke_result_custom_signature.transaction_hash,
-        &hive.account,
     )
-    .await
-    .unwrap();
+    .await;
+    dbg!(pool_address);
 
-    dbg!(tx);
+    let my_commitment = Commitment::new(12345u32, 54321u32, 100u32);
+
+    let commitments = vec![
+        Commitment::new(0u32, 0u32, 100u32),
+        Commitment::new(1u32, 1u32, 800u32),
+        my_commitment.clone(),
+        Commitment::new(3u32, 3u32, 1000u32),
+    ];
+
+    let associated_set_commitments = vec![
+        Commitment::new(514u32, 876u32, 100u32),
+        Commitment::new(1u32, 1u32, 800u32),
+        my_commitment.clone(),
+        Commitment::new(3u32, 3u32, 1000u32),
+    ];
+
+    approve(&hive, erc20_address, pool_address).await;
+
+    for commitment in commitments.iter() {
+        deposit(&hive, pool_address, commitment).await;
+    }
+    for commitment in associated_set_commitments.iter() {
+        deposit(&hive, pool_address, commitment).await;
+    }
+
+    let tree = HybridMerkleTree::contract_height_with_leafs(
+        commitments.iter().map(Commitment::hash).collect(),
+    );
+    let associated_tree = HybridMerkleTree::contract_height_with_leafs(
+        associated_set_commitments
+            .iter()
+            .map(Commitment::hash)
+            .collect(),
+    );
+
+    withdraw(
+        &hive,
+        pool_address,
+        my_commitment,
+        commitments,
+        associated_set_commitments,
+    )
+    .await;
 }
 
 async fn declare<T: Account + Debug + ConnectedAccount + Sync>(
@@ -151,4 +186,132 @@ async fn deploy(hive: &StarknetHive, class_hash: Felt, calldata: Vec<Felt>) -> F
             .unwrap();
 
     deployed_contract_address
+}
+
+async fn approve(hive: &StarknetHive, erc20_address: Felt, pool_address: Felt) {
+    let approve_call = Call {
+        to: erc20_address,
+        selector: get_selector_from_name("approve").unwrap(),
+        calldata: vec![
+            pool_address,
+            Felt::from_dec_str("1000000").unwrap(),
+            Felt::from_dec_str("0").unwrap(),
+        ],
+    };
+    let prepared_execution_v3 = hive.execute_v3(vec![approve_call]).prepare().await.unwrap();
+
+    let signature = hive
+        .sign_execution_v3(prepared_execution_v3.get_raw_execution().await, false)
+        .await
+        .unwrap();
+
+    let invoke_result_custom_signature = prepared_execution_v3
+        .send_with_custom_signature(signature)
+        .await
+        .unwrap();
+
+    let tx = wait_for_sent_transaction(
+        invoke_result_custom_signature.transaction_hash,
+        &hive.account,
+    )
+    .await
+    .unwrap();
+
+    dbg!(tx);
+}
+
+async fn deposit(hive: &StarknetHive, pool_address: Felt, commitment: &Commitment) {
+    let mut calldata = vec![];
+    calldata.extend(<U256 as CairoSerde>::cairo_serialize(
+        &commitment.secret_and_nullifier_hash(),
+    ));
+    calldata.extend(<U256 as CairoSerde>::cairo_serialize(&commitment.amount));
+    let approve_call = Call {
+        to: pool_address,
+        selector: get_selector_from_name("deposit").unwrap(),
+        calldata: calldata,
+    };
+    let prepared_execution_v3 = hive.execute_v3(vec![approve_call]).prepare().await.unwrap();
+
+    let signature = hive
+        .sign_execution_v3(prepared_execution_v3.get_raw_execution().await, false)
+        .await
+        .unwrap();
+
+    let invoke_result_custom_signature = prepared_execution_v3
+        .send_with_custom_signature(signature)
+        .await
+        .unwrap();
+
+    let tx = wait_for_sent_transaction(
+        invoke_result_custom_signature.transaction_hash,
+        &hive.account,
+    )
+    .await
+    .unwrap();
+
+    dbg!(tx);
+}
+
+async fn withdraw(
+    hive: &StarknetHive,
+    pool_address: Felt,
+    commitment: Commitment,
+    commitments: Vec<Commitment>,
+    associated_set_commitments: Vec<Commitment>,
+) {
+    let tree = HybridMerkleTree::contract_height_with_leafs(
+        commitments.iter().map(Commitment::hash).collect(),
+    );
+    let associated_set_tree = HybridMerkleTree::contract_height_with_leafs(
+        associated_set_commitments
+            .iter()
+            .map(Commitment::hash)
+            .collect(),
+    );
+    let another_address = Felt::from_hex_unchecked(
+        "0x078662e7352d062084b0010068b99288486c2d8b914f6e2a55ce945f8792c8b1",
+    );
+
+    let input_creator = CircuitInputCreator::new(
+        commitment.clone(),
+        tree,
+        associated_set_tree,
+        another_address,
+        2u32,
+    );
+
+    let proof = Prover::new("../target")
+        .get_calldata(input_creator.create())
+        .await;
+
+    let withdraw_call = Call {
+        to: pool_address,
+        selector: starknet::macros::selector!("withdraw"),
+        calldata: Vec::<starknet::core::types::Felt>::cairo_serialize(&proof),
+    };
+    let prepared_execution_v3 = hive
+        .execute_v3(vec![withdraw_call])
+        .prepare()
+        .await
+        .unwrap();
+
+    let signature = hive
+        .sign_execution_v3(prepared_execution_v3.get_raw_execution().await, false)
+        .await
+        .unwrap();
+
+    let invoke_result_custom_signature = prepared_execution_v3
+        .send_with_custom_signature(signature)
+        .await
+        .unwrap();
+
+    let tx = wait_for_sent_transaction(
+        invoke_result_custom_signature.transaction_hash,
+        &hive.account,
+    )
+    .await
+    .unwrap();
+
+    dbg!(tx);
 }
