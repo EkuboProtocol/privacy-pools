@@ -153,7 +153,6 @@ async fn test_pool_account_simple() {
     }
 
     withdraw(
-        &hive,
         pool_address,
         my_commitment,
         commitments,
@@ -276,7 +275,6 @@ async fn deposit(hive: &StarknetHive, pool_address: Felt, commitment: &Commitmen
 }
 
 async fn withdraw(
-    hive: &StarknetHive,
     pool_address: Felt,
     commitment: Commitment,
     commitments: Vec<Commitment>,
@@ -328,8 +326,8 @@ async fn withdraw(
     let mut calldata = vec![Felt::from(proof.len())];
     calldata.extend(proof);
     let invoke_call = Call {
-        to: STRK,
-        selector: starknet::macros::selector!("transfer"),
+        to: pool_address,
+        selector: starknet::macros::selector!("withdraw"),
         calldata: calldata,
     };
     let prepared_execution_v3 = pool_account
@@ -339,7 +337,7 @@ async fn withdraw(
         .unwrap();
 
     let invoke_result_custom_signature = prepared_execution_v3
-        .send_with_custom_signature(Default::default())
+        .send_with_custom_signature(vec![])
         .await
         .unwrap();
 

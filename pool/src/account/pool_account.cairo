@@ -16,7 +16,7 @@ trait IPoolAccount<TContractState> {
 
 #[starknet::contract(account)]
 mod PoolAccount {
-    use openzeppelin::account::{extensions::SRC9Component, utils::execute_calls};
+    use openzeppelin::account::extensions::SRC9Component;
     use openzeppelin::introspection::src5::SRC5Component;
     use openzeppelin::upgrades::UpgradeableComponent;
     use openzeppelin::{
@@ -26,10 +26,10 @@ mod PoolAccount {
     use starknet::{
         ContractAddress, get_caller_address, get_contract_address, account::Call,
         event::EventEmitter, storage::{Map, StoragePointerWriteAccess, StoragePointerReadAccess},
-        SyscallResultTrait,
     };
     use crate::hash;
 
+    use crate::account::utils::{execute_calls, is_valid};
     use crate::merkle::MerkleTreeComponent;
 
     component!(path: SRC5Component, storage: src5, event: SRC5Event);
@@ -49,9 +49,6 @@ mod PoolAccount {
     impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
     impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
     impl MerkleTreeInternalImpl = MerkleTreeComponent::InternalImpl<ContractState>;
-
-    const VERIFIER_CLASS_HASH: felt252 =
-        0x1de9feeaaf8f479d7736efb1f8c782ca7b18cd549d30d987c9b4290520c776a;
 
     #[storage]
     struct Storage {
@@ -148,20 +145,11 @@ mod PoolAccount {
         fn withdraw(self: @ContractState, data: Array<felt252>) {}
 
         fn __execute__(self: @ContractState, calls: Array<Call>) -> Array<Span<felt252>> {
-            let call = *calls[0];
-            let mut _vx_x_serialized = core::starknet::syscalls::library_call_syscall(
-                VERIFIER_CLASS_HASH.try_into().unwrap(),
-                selector!("verify_groth16_proof_bn254"),
-                call.calldata,
-            )
-                .unwrap_syscall();
-            // execute_calls(calls.span())
-
-            array![]
+            execute_calls(calls.span())
         }
 
         fn __validate__(self: @ContractState, calls: Array<Call>) -> felt252 {
-            starknet::VALIDATED
+            is_valid(calls.span())
         }
 
         fn is_valid_signature(
