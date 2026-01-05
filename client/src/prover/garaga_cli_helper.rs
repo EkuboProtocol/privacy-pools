@@ -33,7 +33,9 @@ impl GaragaCliHelper {
         }
     }
     pub fn save_input(&self, input: CircuitInput) {
-        let path = self.witness_dir().join(&self.input_path);
+        let witness_dir = self.witness_dir();
+        std::fs::create_dir_all(&witness_dir).unwrap();
+        let path = witness_dir.join(&self.input_path);
         std::fs::File::create(path)
             .unwrap()
             .write_all(serde_json::to_string_pretty(&input).unwrap().as_bytes())
@@ -59,14 +61,36 @@ impl GaragaCliHelper {
         ));
 
         let output = Command::new("node")
-            .arg(generator_path)
-            .arg(wasm_path)
-            .arg(input_path)
-            .arg(witness_path)
+            .arg(&generator_path)
+            .arg(&wasm_path)
+            .arg(&input_path)
+            .arg(&witness_path)
             .output()
             .unwrap();
-        tracing::info!("{}", String::from_utf8(output.stderr.to_owned()).unwrap());
-        assert!(output.status.success());
+        if !output.stderr.is_empty() {
+            tracing::error!(
+                "Witness generation stderr: {}",
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+        if !output.stdout.is_empty() {
+            tracing::error!(
+                "Witness generation stdout: {}",
+                String::from_utf8_lossy(&output.stdout)
+            );
+        }
+        if !output.status.success() {
+            panic!(
+                "Witness generation failed: status={:?}, stderr={}, stdout={}, generator_path={}, wasm_path={}, input_path={}, witness_path={}",
+                output.status,
+                String::from_utf8_lossy(&output.stderr),
+                String::from_utf8_lossy(&output.stdout),
+                generator_path.display(),
+                wasm_path.display(),
+                input_path.display(),
+                witness_path.display()
+            );
+        }
         assert_eq!(output.status.code(), Some(0));
         assert!(output.stderr.is_empty());
         assert!(output.stdout.is_empty());

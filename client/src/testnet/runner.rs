@@ -38,6 +38,7 @@ pub struct KatanaRunner {
     chain_id: Felt,
     testnet: SubprocessRunner,
     rpc_client: Arc<JSONClient>,
+    rpc_url: Url,
 }
 
 impl KatanaRunner {
@@ -54,7 +55,7 @@ impl KatanaRunner {
 
         let testnet = SubprocessRunner::new(child, |l| l.contains("RPC server started"));
 
-        let rpc_url = Url::parse(&format!("http://0.0.0.0:{}/", katana_port)).unwrap();
+        let rpc_url = Url::parse(&format!("http://127.0.0.1:{}/", katana_port)).unwrap();
 
         let chain_id = cairo_short_string_to_felt(&config.chain_id).expect("Should convert");
         let rpc_client = JsonRpcClient::new(HttpTransport::new(rpc_url.clone()));
@@ -63,6 +64,7 @@ impl KatanaRunner {
             chain_id,
             testnet,
             rpc_client: Arc::new(rpc_client),
+            rpc_url,
         }
     }
 
@@ -72,6 +74,10 @@ impl KatanaRunner {
 
     pub fn client(&self) -> &JSONClient {
         &self.rpc_client
+    }
+
+    pub fn rpc_url(&self) -> &Url {
+        &self.rpc_url
     }
 
     pub fn prefunded_account(&self) -> SOAccount {
