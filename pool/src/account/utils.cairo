@@ -1,13 +1,18 @@
 use starknet::SyscallResultTrait;
 use starknet::account::Call;
+use starknet::{ClassHash, ContractAddress};
+use crate::verifier::groth16_verifier::{IGroth16VerifierBN254Dispatcher, IGroth16VerifierBN254DispatcherTrait};
 
-const VERIFIER_CLASS_HASH: felt252 =
-    0x1de9feeaaf8f479d7736efb1f8c782ca7b18cd549d30d987c9b4290520c776a;
+const INVALID_PROOF: felt252 = 'Pool: invalid proof';
 
-pub fn is_valid(calls: Span<Call>) -> felt252 {
+// is_valid is called from __validate__ which runs in validation mode
+// Only library calls are allowed in validation mode, so we must use verifier_class_hash
+pub fn is_valid(calls: Span<Call>, verifier_class_hash: ClassHash) -> felt252 {
     for call in calls {
+        // For library calls, pass the entire calldata as-is
+        // The verifier's deserialize_full_proof_with_hints_bn254 will handle the format
         let mut output_serialized = core::starknet::syscalls::library_call_syscall(
-            VERIFIER_CLASS_HASH.try_into().unwrap(),
+            verifier_class_hash,
             selector!("verify_groth16_proof_bn254"),
             *call.calldata,
         )
@@ -17,21 +22,33 @@ pub fn is_valid(calls: Span<Call>) -> felt252 {
     starknet::VALIDATED
 }
 
-pub fn execute_calls(calls: Span<Call>) -> Array<Span<felt252>> {
+// execute_calls is called from __execute__ which runs in execution mode
+// Regular contract calls are allowed, so we can use verifier_address
+pub fn execute_calls(calls: Span<Call>, verifier_address: ContractAddress) -> Array<Span<felt252>> {
     let mut res = array![];
     for call in calls {
-        let mut output_serialized = core::starknet::syscalls::library_call_syscall(
-            VERIFIER_CLASS_HASH.try_into().unwrap(),
-            selector!("verify_groth16_proof_bn254"),
-            *call.calldata,
-        )
-            .unwrap_syscall();
-        let output = Serde::<Option<Span<felt252>>>::deserialize(ref output_serialized)
-            .unwrap()
-            .unwrap();
+        // calldata is [len, proof_0, proof_1, ...] (Cairo array serialization)
+        // Extract the proof by skipping the length prefix
+        let calldata_span = *call.calldata;
+        let mut proof_array: Array<felt252> = array![];
+        let mut i: u32 = 1;
+        while i < calldata_span.len() {
+            proof_array.append(*calldata_span[i]);
+            i += 1;
+        };
+        
+        // Verify the proof and get public inputs
+        let public_input_serialized_opt = IGroth16VerifierBN254Dispatcher {
+            contract_address: verifier_address,
+        }
+            .verify_groth16_proof_bn254(proof_array.span());
+        
+        // Check that proof is valid
+        let public_input_serialized = public_input_serialized_opt.expect(INVALID_PROOF);
 
+        // Serialize public inputs and execute the call with them
         let mut calldata = array![];
-        Serde::serialize(@output, ref calldata);
+        Serde::serialize(@public_input_serialized, ref calldata);
         let call = Call { to: *call.to, selector: *call.selector, calldata: calldata.span() };
         res.append(execute_single_call(@call))
     };
