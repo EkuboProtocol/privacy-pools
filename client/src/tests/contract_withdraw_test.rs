@@ -467,6 +467,13 @@ async fn test_contract_withdraw_wrong_root_panic() {
         Commitment::new(1u32, 1u32, 800u32),
         my_commitment.clone(),
         Commitment::new(3u32, 3u32, 1000u32),
+    ];
+
+    // Different commitments for proof generation - will produce a different root
+    let proof_commitments = vec![
+        Commitment::new(514u32, 876u32, 100u32), // Different from commitments[0]
+        Commitment::new(1u32, 1u32, 800u32),
+        my_commitment.clone(), // Must be the same for the proof to be valid
         Commitment::new(3u32, 3u32, 1000u32),
     ];
 
@@ -485,7 +492,7 @@ async fn test_contract_withdraw_wrong_root_panic() {
     approve_helper(pool_address, sum, erc20_address, prefunded_account.clone()).await;
 
     let mut tx = Felt::ZERO;
-    for c in commitments.iter().take(4) {
+    for c in &commitments {
         tx = pool
             .deposit(&c.secret_and_nullifier_hash(), &c.amount)
             .send()
@@ -498,9 +505,11 @@ async fn test_contract_withdraw_wrong_root_panic() {
         .await
         .unwrap();
 
+    // Use proof_commitments for the proof - this will produce a different root
+    // than what's in the contract, causing the contract to reject it
     let input_creator = CircuitInputCreator::new(
         my_commitment.clone(),
-        MerkleTree::contract_height_with_leafs(commitments.iter().map(Commitment::hash).collect()),
+        MerkleTree::contract_height_with_leafs(proof_commitments.iter().map(Commitment::hash).collect()),
         MerkleTree::contract_height_with_leafs(
             associated_set_commitments
                 .iter()
