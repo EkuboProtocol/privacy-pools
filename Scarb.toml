@@ -9,7 +9,7 @@ edition = "2024_07"
 assert_macros = "2.9.1"
 garaga = { git = "https://github.com/keep-starknet-strange/garaga.git", tag = "v0.15.3" }
 openzeppelin = "0.20.0"
-snforge_std = "0.35.1"
+snforge_std = "0.40.0"
 starknet = "2.9.1"
 
 [cairo]

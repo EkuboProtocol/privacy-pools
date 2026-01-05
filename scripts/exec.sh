@@ -2,7 +2,15 @@
 
 set -euxo pipefail
 
-starknet-devnet --seed 0
+# Start Katana (required - starknet-devnet doesn't support BlockTag::Pending)
+katana --chain-id SN_SEPOLIA &
+KATANA_PID=$!
+
+# Wait for Katana to be ready
+sleep 3
+
+# Cleanup function to kill Katana on script exit
+trap "kill $KATANA_PID 2>/dev/null || true" EXIT
 
 sncast declare --contract-name ERC20Upgradeable
 sncast declare --contract-name UniversalECIP

@@ -2,14 +2,24 @@
 
 set -euxo pipefail
 
+# Add asdf shims to PATH if asdf is installed
+if [ -d "$HOME/.asdf" ]; then
+    export PATH="$HOME/.asdf/shims:$PATH"
+fi
+
+# Activate Python virtual environment if it exists
+if [ -f .venv/bin/activate ]; then
+    source .venv/bin/activate
+fi
+
 mkdir -p target
-circom circuits/pool.circom --r1cs --wasm --sym --c --output target
+circom2 circuits/pool.circom --r1cs --wasm --sym --c --output target
 # node target/pool_js/generate_witness.js target/pool_js/pool.wasm circuits/input.json target/pool.wtns
 npx snarkjs powersoftau new bn128 16 target/pot16_0000.ptau
-npx snarkjs powersoftau contribute target/pot16_0000.ptau target/pot16_0001.ptau --name="First contribution"
+echo "random text for contribution" | npx snarkjs powersoftau contribute target/pot16_0000.ptau target/pot16_0001.ptau --name="First contribution"
 npx snarkjs powersoftau prepare phase2 target/pot16_0001.ptau target/pot16_final.ptau
 npx snarkjs groth16 setup target/pool.r1cs target/pot16_final.ptau target/pool_0000.zkey
-npx snarkjs zkey contribute target/pool_0000.zkey target/pool_0001.zkey --name="1st Contributor Name"
+echo "random text for zkey contribution" | npx snarkjs zkey contribute target/pool_0000.zkey target/pool_0001.zkey --name="1st Contributor Name"
 npx snarkjs zkey export verificationkey target/pool_0001.zkey target/verification_key.json
 npx snarkjs zkey export solidityverifier target/pool_0001.zkey target/verifier.sol
 garaga gen --project-name verifier --system groth16 --vk target/verification_key.json
