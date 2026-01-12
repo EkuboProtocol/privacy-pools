@@ -126,7 +126,7 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> Groth16VerifierBN254<A> {
         full_proof_with_hints: &Vec<starknet::core::types::Felt>,
     ) -> cainome::cairo_serde::call::FCall<
         A::Provider,
-        Option<Vec<cainome::cairo_serde::U256>>,
+        Result<Vec<cainome::cairo_serde::U256>, starknet::core::types::Felt>,
     > {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
@@ -152,7 +152,10 @@ impl<P: starknet::providers::Provider + Sync> Groth16VerifierBN254Reader<P> {
     pub fn verify_groth16_proof_bn254(
         &self,
         full_proof_with_hints: &Vec<starknet::core::types::Felt>,
-    ) -> cainome::cairo_serde::call::FCall<P, Option<Vec<cainome::cairo_serde::U256>>> {
+    ) -> cainome::cairo_serde::call::FCall<
+        P,
+        Result<Vec<cainome::cairo_serde::U256>, starknet::core::types::Felt>,
+    > {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
         __calldata
