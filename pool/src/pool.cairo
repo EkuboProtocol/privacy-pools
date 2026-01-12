@@ -38,24 +38,21 @@ impl PublicInputImpl of PublicInputTrait {
 
 #[starknet::contract]
 mod Pool {
-    use openzeppelin::{
-        access::ownable::OwnableComponent,
-        token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait},
+    use openzeppelin::access::ownable::OwnableComponent;
+    use openzeppelin::interfaces::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
+    use starknet::event::EventEmitter;
+    use starknet::storage::{
+        Map, StorageMapReadAccess, StoragePathEntry, StoragePointerReadAccess,
+        StoragePointerWriteAccess,
     };
-    use starknet::{
-        ContractAddress, get_caller_address, get_contract_address, event::EventEmitter,
-        storage::{
-            Map, StoragePathEntry, StoragePointerWriteAccess, StorageMapReadAccess,
-            StoragePointerReadAccess,
-        },
-    };
-
-    use super::PublicInputImpl;
+    use starknet::{ContractAddress, get_caller_address, get_contract_address};
     use crate::hash;
-    use crate::merkle::{MerkleTreeComponent, MerkleTreeComponent::InternalTrait};
+    use crate::merkle::MerkleTreeComponent;
+    use crate::merkle::MerkleTreeComponent::InternalTrait;
     use crate::verifier::groth16_verifier::{
         IGroth16VerifierBN254Dispatcher, IGroth16VerifierBN254DispatcherTrait,
     };
+    use super::PublicInputImpl;
 
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
     component!(path: MerkleTreeComponent, storage: merkle, event: MerkleEvent);

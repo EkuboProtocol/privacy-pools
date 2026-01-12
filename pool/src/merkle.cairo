@@ -1,12 +1,11 @@
 #[starknet::component]
 pub mod MerkleTreeComponent {
     use core::starknet::storage::{
-        StoragePointerReadAccess, StoragePointerWriteAccess, Map, StoragePathEntry, Vec,
-        MutableVecTrait,
+        Map, MutableVecTrait, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess,
+        Vec,
     };
-
-    use super::{precomputed_hashes, height};
     use crate::hash;
+    use super::{height, precomputed_hashes};
 
     #[storage]
     pub struct Storage {
@@ -53,7 +52,7 @@ pub mod MerkleTreeComponent {
                 };
                 index = index / 2;
                 hash_ = cur;
-            };
+            }
             self.left_path.at(height - 1).write(hash_);
             self.roots.entry(hash_).write(true);
             self.root.write(hash_);
@@ -65,8 +64,7 @@ pub const height: u32 = 25;
 
 fn precomputed_hashes() -> Array<u256> {
     let mut arr = array![
-        0x0,
-        0x2098f5fb9e239eab3ceac3f27b81e481dc3124d55ffed523a839ee8446b64864,
+        0x0, 0x2098f5fb9e239eab3ceac3f27b81e481dc3124d55ffed523a839ee8446b64864,
         0x1069673dcdb12263df301a6ff584a7ec261a44cb9dc68df067a4774460b1f1e1,
         0x18f43331537ee2af2e3d758d50f72106467c6eea50371dd528d57eb2b856d238,
         0x7f9d837cb17b0d36320ffe93ba52345f1b728571a568265caac97559dbc952a,
