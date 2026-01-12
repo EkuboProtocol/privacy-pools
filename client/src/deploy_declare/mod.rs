@@ -1,6 +1,10 @@
 pub mod declare;
 pub mod deploy;
+pub mod ekubo;
 pub mod pending;
+
+// Re-export Ekubo types
+pub use ekubo::{EkuboDeployer, DeployedEkubo, PoolKey};
 
 use std::str::FromStr;
 
@@ -85,10 +89,11 @@ impl<'a> ERC20ContractDeployer<'a, 1> {
         calldata.push(recipient);
         calldata.push(owner);
 
+        // Use a random salt so each ERC20 gets a unique address
         let deployment = ContractDeployment::new(self.client)
             .deploy(
                 calldata,
-                self.account.address(),
+                SigningKey::from_random().secret_scalar(),
                 self.account,
                 declaration.class_hash,
             )
@@ -123,6 +128,7 @@ pub struct PoolContractDeployer<'a, const V: bool, const P: bool, const D: bool>
     verifier_declaration: Option<DeclareTransactionResult>,
     pool_declaration: Option<DeclareTransactionResult>,
     verifier_deployment: Option<DeployResult>,
+    ecip_class_hash: Option<Felt>,
 }
 
 impl<'a> PoolContractDeployer<'a, false, false, false> {
@@ -136,18 +142,19 @@ impl<'a> PoolContractDeployer<'a, false, false, false> {
             verifier_declaration: None,
             pool_declaration: None,
             verifier_deployment: None,
+            ecip_class_hash: None,
         }
     }
 }
 impl<'a, const P: bool> PoolContractDeployer<'a, false, P, false> {
     pub async fn declare_verifier_contract(self) -> PoolContractDeployer<'a, true, P, false> {
-        let _ecip_declaration = ContractDeclaration::universal_ecip(self.client)
+        let ecip_declaration = ContractDeclaration::universal_ecip(self.client)
             .declare(self.account)
             .await
             .unwrap()
             .wait_for_completion()
             .await;
-        dbg!(_ecip_declaration.class_hash);
+        dbg!(ecip_declaration.class_hash);
         let declaration = ContractDeclaration::verifier(self.client)
             .declare(self.account)
             .await
@@ -160,6 +167,7 @@ impl<'a, const P: bool> PoolContractDeployer<'a, false, P, false> {
             verifier_declaration: Some(declaration),
             pool_declaration: self.pool_declaration,
             verifier_deployment: self.verifier_deployment,
+            ecip_class_hash: Some(ecip_declaration.class_hash),
         }
     }
 }
@@ -177,6 +185,7 @@ impl<'a, const V: bool, const D: bool> PoolContractDeployer<'a, V, false, D> {
             verifier_declaration: self.verifier_declaration,
             pool_declaration: Some(declaration),
             verifier_deployment: self.verifier_deployment,
+            ecip_class_hash: self.ecip_class_hash,
         }
     }
 }
@@ -186,7 +195,7 @@ impl<'a, const P: bool> PoolContractDeployer<'a, true, P, false> {
         let declaration = self.verifier_declaration.unwrap();
         let deployment = ContractDeployment::new(self.client)
             .deploy(
-                vec![],
+                vec![],  // No constructor args - ECIP class hash is a compile-time constant
                 self.account.address(),
                 self.account,
                 declaration.class_hash,
@@ -206,6 +215,7 @@ impl<'a, const P: bool> PoolContractDeployer<'a, true, P, false> {
             verifier_declaration: Some(declaration),
             pool_declaration: self.pool_declaration,
             verifier_deployment: Some(deployment),
+            ecip_class_hash: self.ecip_class_hash,
         }
     }
 }

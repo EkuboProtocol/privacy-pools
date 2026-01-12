@@ -1,6 +1,6 @@
 use std::io::Write;
 use std::path::PathBuf;
-use std::process::{Command, Output};
+use std::process::Command;
 use std::str::{self, FromStr};
 
 use starknet_crypto::Felt;
@@ -33,14 +33,17 @@ impl GaragaCliHelper {
         }
     }
     pub fn save_input(&self, input: CircuitInput) {
-        let path = self.witness_dir().join(&self.input_path);
+        let witness_dir = self.witness_dir();
+        std::fs::create_dir_all(&witness_dir).unwrap();
+        let path = witness_dir.join(&self.input_path);
         std::fs::File::create(path)
             .unwrap()
             .write_all(serde_json::to_string_pretty(&input).unwrap().as_bytes())
             .unwrap();
     }
     pub fn get_calldata(&self) -> Vec<Felt> {
-        self.convert_call_data_output(self.run_calldata_command())
+        self.run_calldata_command();
+        self.convert_call_data_output()
     }
     pub fn generate_witness(&self) {
         let generator_path = PathBuf::new()
@@ -59,14 +62,36 @@ impl GaragaCliHelper {
         ));
 
         let output = Command::new("node")
-            .arg(generator_path)
-            .arg(wasm_path)
-            .arg(input_path)
-            .arg(witness_path)
+            .arg(&generator_path)
+            .arg(&wasm_path)
+            .arg(&input_path)
+            .arg(&witness_path)
             .output()
             .unwrap();
-        tracing::info!("{}", String::from_utf8(output.stderr.to_owned()).unwrap());
-        assert!(output.status.success());
+        if !output.stderr.is_empty() {
+            tracing::error!(
+                "Witness generation stderr: {}",
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+        if !output.stdout.is_empty() {
+            tracing::error!(
+                "Witness generation stdout: {}",
+                String::from_utf8_lossy(&output.stdout)
+            );
+        }
+        if !output.status.success() {
+            panic!(
+                "Witness generation failed: status={:?}, stderr={}, stdout={}, generator_path={}, wasm_path={}, input_path={}, witness_path={}",
+                output.status,
+                String::from_utf8_lossy(&output.stderr),
+                String::from_utf8_lossy(&output.stdout),
+                generator_path.display(),
+                wasm_path.display(),
+                input_path.display(),
+                witness_path.display()
+            );
+        }
         assert_eq!(output.status.code(), Some(0));
         assert!(output.stderr.is_empty());
         assert!(output.stdout.is_empty());
@@ -96,7 +121,7 @@ impl GaragaCliHelper {
     fn witness_dir(&self) -> PathBuf {
         self.dir.join(format!("{}_js", self.circuit_name))
     }
-    fn run_calldata_command(&self) -> Output {
+    fn run_calldata_command(&self) {
         let output = Command::new("garaga")
             .arg("calldata")
             .arg("--vk")
@@ -118,14 +143,16 @@ impl GaragaCliHelper {
         }
         assert!(output.status.success());
         assert_eq!(output.status.code(), Some(0));
-        output
     }
-    fn convert_call_data_output(&self, output: Output) -> Vec<Felt> {
-        let stdout = str::from_utf8(&output.stdout).unwrap();
-        let strings: Vec<&str> = stdout.split_whitespace().skip(1).collect();
-        strings
-            .into_iter()
-            .map(|s| Felt::from_str(s).unwrap())
+    fn convert_call_data_output(&self) -> Vec<Felt> {
+        // garaga v1.0.1+ writes calldata to proof_calldata.txt in the current directory
+        let calldata_path = self.dir.join("proof_calldata.txt");
+        let content = std::fs::read_to_string(&calldata_path)
+            .unwrap_or_else(|e| panic!("Failed to read {}: {}", calldata_path.display(), e));
+        content
+            .lines()
+            .filter(|line| !line.is_empty())
+            .map(|s| Felt::from_hex(s).unwrap())
             .collect()
     }
 }

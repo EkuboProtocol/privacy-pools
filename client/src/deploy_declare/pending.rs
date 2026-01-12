@@ -14,6 +14,9 @@ where
     transaction_result: T,
     transaction_hash: Felt,
     client: &'a P,
+    /// If true, the transaction is already complete (e.g., class already declared)
+    /// and wait_for_completion() will return immediately without polling.
+    already_complete: bool,
 }
 
 impl<'a, P, T> PendingTransaction<'a, P, T>
@@ -25,9 +28,23 @@ where
             transaction_result,
             transaction_hash,
             client,
+            already_complete: false,
         }
     }
+
+    pub fn new_already_complete(transaction_result: T, client: &'a P) -> Self {
+        PendingTransaction {
+            transaction_result,
+            transaction_hash: Felt::ZERO,
+            client,
+            already_complete: true,
+        }
+    }
+
     pub async fn wait_for_completion(self) -> T {
+        if self.already_complete {
+            return self.transaction_result;
+        }
         TransactionWaiter::new(self.transaction_hash, &self.client)
             .wait()
             .await

@@ -3,11 +3,15 @@ use std::path::PathBuf;
 use starknet_crypto::Felt;
 use tokio::sync::Mutex;
 mod garaga_cli_helper;
+pub mod swap;
 
 use crate::circuit::CircuitInput;
 
 use garaga_cli_helper::GaragaCliHelper;
 use lazy_static::lazy_static;
+
+// Re-export swap prover types
+pub use swap::{SwapProver, SwapCircuitInput, SwapCommitment, SwapInputBuilder};
 
 lazy_static! {
     static ref PROOF_MUTEX: Mutex<()> = Mutex::new(());
@@ -19,7 +23,7 @@ pub struct Prover {
 
 impl Default for Prover {
     fn default() -> Self {
-        Self::new("./target")
+        Self::new("./target/circuits")
     }
 }
 
@@ -28,6 +32,13 @@ impl Prover {
         Self {
             cli: GaragaCliHelper::new(dir, "pool", "verification_key.json"),
         }
+    }
+    
+    /// Create prover with circuits directory relative to given base path
+    pub fn with_base(base: impl Into<PathBuf>) -> Self {
+        let mut path = base.into();
+        path.push("circuits");
+        Self::new(path)
     }
     pub async fn get_calldata(&self, input: CircuitInput) -> Vec<Felt> {
         let _lock = PROOF_MUTEX.lock().await;

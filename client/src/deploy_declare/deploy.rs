@@ -46,14 +46,29 @@ impl<'a, T> ContractDeployment<'a, T> {
 
         let deployment = contract_factory.deploy_v3(constructor_calldata, salt, false);
         let deployed_address = deployment.deployed_address();
-        let InvokeTransactionResult { transaction_hash } =
-            deployment.send().await.expect("Unable to deploy contract");
 
-        let result = DeployResult {
-            deployed_address,
-            transaction_hash,
-        };
-
-        Ok(PendingDeployment::from((result, self.client)))
+        match deployment.send().await {
+            Ok(InvokeTransactionResult { transaction_hash }) => {
+                let result = DeployResult {
+                    deployed_address,
+                    transaction_hash,
+                };
+                Ok(PendingDeployment::from((result, self.client)))
+            }
+            Err(err) => {
+                // Use Debug format to get nested error details
+                let err_debug = format!("{:?}", err);
+                // Handle "already deployed" as success - the contract exists on-chain
+                if err_debug.contains("already deployed") {
+                    let result = DeployResult {
+                        deployed_address,
+                        transaction_hash: Felt::ZERO,
+                    };
+                    Ok(PendingDeployment::new_already_complete(result, self.client))
+                } else {
+                    Err(format!("Unable to deploy contract: {}", err))
+                }
+            }
+        }
     }
 }
