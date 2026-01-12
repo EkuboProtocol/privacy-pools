@@ -323,3 +323,10 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
+
+#### GENERATED VERIFIER ARTIFACTS
+
+# Verifier constants are environment-specific (generated from local trusted setup)
+verifier/src/groth16_verifier_constants.cairo
+pool/src/verifier/groth16_verifier_constants.cairo
+

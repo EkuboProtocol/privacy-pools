@@ -1,13 +1,41 @@
 // SPDX-License-Identifier: MIT
 // Compatible with OpenZeppelin Contracts for Cairo ^0.20.0
+use starknet::ContractAddress;
 use starknet::account::Call;
+
+#[derive(Drop)]
+pub struct PublicInput {
+    pub root: u256,
+    pub nullifier_hash: u256,
+    pub recipient: ContractAddress,
+    pub fee: u256,
+    pub refund_commitment_hash: u256,
+    pub amount: u256,
+    pub associated_set_root: u256,
+}
+
+#[generate_trait]
+pub impl PublicInputImpl of PublicInputTrait {
+    fn from_u256_span(span: Span<u256>) -> PublicInput {
+        let recipient: felt252 = (*span[2]).try_into().unwrap();
+        PublicInput {
+            root: *span[0],
+            nullifier_hash: *span[1],
+            recipient: recipient.try_into().unwrap(),
+            fee: *span[3],
+            refund_commitment_hash: *span[4],
+            amount: *span[5],
+            associated_set_root: *span[6],
+        }
+    }
+}
 
 #[starknet::interface]
 trait IPoolAccount<TContractState> {
     fn deposit(ref self: TContractState, secret_and_nullifier_hash: u256, amount: u256) -> bool;
-    fn withdraw(self: @TContractState, data: Array<felt252>);
+    fn withdraw(ref self: TContractState, public_inputs: Span<u256>);
 
-    fn __execute__(self: @TContractState, calls: Array<Call>) -> Array<Span<felt252>>;
+    fn __execute__(ref self: TContractState, calls: Array<Call>) -> Array<Span<felt252>>;
     fn __validate__(self: @TContractState, calls: Array<Call>) -> felt252;
     fn is_valid_signature(
         self: @TContractState, hash: felt252, signature: Array<felt252>,
@@ -16,21 +44,23 @@ trait IPoolAccount<TContractState> {
 
 #[starknet::contract(account)]
 mod PoolAccount {
+    use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::account::extensions::SRC9Component;
+    use openzeppelin::interfaces::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
     use openzeppelin::introspection::src5::SRC5Component;
     use openzeppelin::upgrades::UpgradeableComponent;
-    use openzeppelin::{
-        access::ownable::OwnableComponent,
-        token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait},
+    use starknet::account::Call;
+    use starknet::event::EventEmitter;
+    use starknet::storage::{
+        Map, StorageMapReadAccess, StoragePathEntry, StoragePointerReadAccess,
+        StoragePointerWriteAccess,
     };
-    use starknet::{
-        ContractAddress, get_caller_address, get_contract_address, account::Call,
-        event::EventEmitter, storage::{Map, StoragePointerWriteAccess, StoragePointerReadAccess},
-    };
-    use crate::hash;
-
+    use starknet::{ClassHash, ContractAddress, get_caller_address, get_contract_address};
     use crate::account::utils::{execute_calls, is_valid};
+    use crate::hash;
     use crate::merkle::MerkleTreeComponent;
+    use crate::merkle::MerkleTreeComponent::InternalTrait;
+    use super::PublicInputImpl;
 
     component!(path: SRC5Component, storage: src5, event: SRC5Event);
     component!(path: SRC9Component, storage: src9, event: SRC9Event);
@@ -64,6 +94,7 @@ mod PoolAccount {
         merkle: MerkleTreeComponent::Storage,
         token: IERC20Dispatcher,
         verifier: ContractAddress,
+        verifier_class_hash: ClassHash,
         nullifier_hashes: Map<u256, bool>,
         min_fee: u256,
         total_fee: u256,
@@ -120,11 +151,13 @@ mod PoolAccount {
         owner: ContractAddress,
         token: ContractAddress,
         verifier: ContractAddress,
+        verifier_class_hash: ClassHash,
         min_fee: u256,
     ) {
         self.ownable.initializer(owner);
         self.token.write(IERC20Dispatcher { contract_address: token });
         self.verifier.write(verifier);
+        self.verifier_class_hash.write(verifier_class_hash);
         self.merkle.initializer();
         self.min_fee.write(min_fee);
         self.total_fee.write(0);
@@ -142,14 +175,55 @@ mod PoolAccount {
 
             true
         }
-        fn withdraw(self: @ContractState, data: Array<felt252>) {}
+        fn withdraw(ref self: ContractState, public_inputs: Span<u256>) {
+            let public_input = PublicInputImpl::from_u256_span(public_inputs);
 
-        fn __execute__(self: @ContractState, calls: Array<Call>) -> Array<Span<felt252>> {
-            execute_calls(calls.span())
+            // Check nullifier hasn't been used
+            assert(
+                self.nullifier_hashes.read(public_input.nullifier_hash) == false,
+                'Nullifier already used',
+            );
+            self.nullifier_hashes.entry(public_input.nullifier_hash).write(true);
+
+            // Check merkle root is valid
+            assert(self.merkle.roots.read(public_input.root) == true, 'Invalid root');
+
+            // Check fee is sufficient
+            let min_fee: u256 = self.min_fee.read().into();
+            assert(min_fee <= public_input.fee.into(), 'Insufficient fee');
+            self.total_fee.write(self.total_fee.read() + public_input.fee);
+
+            // Transfer tokens to recipient
+            self
+                .token
+                .read()
+                .transfer(public_input.recipient, (public_input.amount - public_input.fee).into());
+
+            // Add refund commitment to merkle tree
+            self.merkle.add_leaf(public_input.refund_commitment_hash);
+
+            let caller = get_caller_address();
+            self
+                .emit(
+                    Withdrawal {
+                        caller,
+                        recipient: public_input.recipient,
+                        amount: public_input.amount,
+                        associated_set_root: public_input.associated_set_root,
+                    },
+                );
+        }
+
+        fn __execute__(ref self: ContractState, calls: Array<Call>) -> Array<Span<felt252>> {
+            // In execution mode, we can use regular contract calls with verifier address
+            let verifier_address = self.verifier.read();
+            execute_calls(calls.span(), verifier_address)
         }
 
         fn __validate__(self: @ContractState, calls: Array<Call>) -> felt252 {
-            is_valid(calls.span())
+            // In validation mode, only library calls are allowed, so we need class hash
+            let verifier_class_hash = self.verifier_class_hash.read();
+            is_valid(calls.span(), verifier_class_hash)
         }
 
         fn is_valid_signature(

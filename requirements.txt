@@ -1,1 +1,1 @@
-git+https://github.com/keep-starknet-strange/garaga.git@3c87bb06ef6a86fa1180fc97de9396317b582cde#egg=garaga
+git+https://github.com/keep-starknet-strange/garaga.git@v1.0.1#egg=garaga

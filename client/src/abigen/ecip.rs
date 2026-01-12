@@ -64,90 +64,6 @@ impl<P: starknet::providers::Provider + Sync> UniversalECIPReader<P> {
     }
 }
 #[derive(Debug, PartialEq)]
-pub struct DerivePointFromXHint {
-    pub y_last_attempt: U384,
-    pub g_rhs_sqrt: Vec<U384>,
-}
-impl cainome::cairo_serde::CairoSerde for DerivePointFromXHint {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        let mut __size = 0;
-        __size += U384::cairo_serialized_size(&__rust.y_last_attempt);
-        __size += Vec::<U384>::cairo_serialized_size(&__rust.g_rhs_sqrt);
-        __size
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
-        let mut __out: Vec<starknet::core::types::Felt> = vec![];
-        __out.extend(U384::cairo_serialize(&__rust.y_last_attempt));
-        __out.extend(Vec::<U384>::cairo_serialize(&__rust.g_rhs_sqrt));
-        __out
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::Felt],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let mut __offset = __offset;
-        let y_last_attempt = U384::cairo_deserialize(__felts, __offset)?;
-        __offset += U384::cairo_serialized_size(&y_last_attempt);
-        let g_rhs_sqrt = Vec::<U384>::cairo_deserialize(__felts, __offset)?;
-        __offset += Vec::<U384>::cairo_serialized_size(&g_rhs_sqrt);
-        Ok(DerivePointFromXHint {
-            y_last_attempt,
-            g_rhs_sqrt,
-        })
-    }
-}
-#[derive(Debug, PartialEq)]
-pub struct FunctionFelt {
-    pub a_num: Vec<U384>,
-    pub a_den: Vec<U384>,
-    pub b_num: Vec<U384>,
-    pub b_den: Vec<U384>,
-}
-impl cainome::cairo_serde::CairoSerde for FunctionFelt {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        let mut __size = 0;
-        __size += Vec::<U384>::cairo_serialized_size(&__rust.a_num);
-        __size += Vec::<U384>::cairo_serialized_size(&__rust.a_den);
-        __size += Vec::<U384>::cairo_serialized_size(&__rust.b_num);
-        __size += Vec::<U384>::cairo_serialized_size(&__rust.b_den);
-        __size
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
-        let mut __out: Vec<starknet::core::types::Felt> = vec![];
-        __out.extend(Vec::<U384>::cairo_serialize(&__rust.a_num));
-        __out.extend(Vec::<U384>::cairo_serialize(&__rust.a_den));
-        __out.extend(Vec::<U384>::cairo_serialize(&__rust.b_num));
-        __out.extend(Vec::<U384>::cairo_serialize(&__rust.b_den));
-        __out
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::Felt],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let mut __offset = __offset;
-        let a_num = Vec::<U384>::cairo_deserialize(__felts, __offset)?;
-        __offset += Vec::<U384>::cairo_serialized_size(&a_num);
-        let a_den = Vec::<U384>::cairo_deserialize(__felts, __offset)?;
-        __offset += Vec::<U384>::cairo_serialized_size(&a_den);
-        let b_num = Vec::<U384>::cairo_deserialize(__felts, __offset)?;
-        __offset += Vec::<U384>::cairo_serialized_size(&b_num);
-        let b_den = Vec::<U384>::cairo_deserialize(__felts, __offset)?;
-        __offset += Vec::<U384>::cairo_serialized_size(&b_den);
-        Ok(FunctionFelt {
-            a_num,
-            a_den,
-            b_num,
-            b_den,
-        })
-    }
-}
-#[derive(Debug, PartialEq)]
 pub struct G1Point {
     pub x: U384,
     pub y: U384,
@@ -178,90 +94,6 @@ impl cainome::cairo_serde::CairoSerde for G1Point {
         let y = U384::cairo_deserialize(__felts, __offset)?;
         __offset += U384::cairo_serialized_size(&y);
         Ok(G1Point { x, y })
-    }
-}
-#[derive(Debug, PartialEq)]
-pub struct MSMHint {
-    pub Q_low: G1Point,
-    pub Q_high: G1Point,
-    pub Q_high_shifted: G1Point,
-    pub RLCSumDlogDiv: FunctionFelt,
-}
-impl cainome::cairo_serde::CairoSerde for MSMHint {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        let mut __size = 0;
-        __size += G1Point::cairo_serialized_size(&__rust.Q_low);
-        __size += G1Point::cairo_serialized_size(&__rust.Q_high);
-        __size += G1Point::cairo_serialized_size(&__rust.Q_high_shifted);
-        __size += FunctionFelt::cairo_serialized_size(&__rust.RLCSumDlogDiv);
-        __size
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
-        let mut __out: Vec<starknet::core::types::Felt> = vec![];
-        __out.extend(G1Point::cairo_serialize(&__rust.Q_low));
-        __out.extend(G1Point::cairo_serialize(&__rust.Q_high));
-        __out.extend(G1Point::cairo_serialize(&__rust.Q_high_shifted));
-        __out.extend(FunctionFelt::cairo_serialize(&__rust.RLCSumDlogDiv));
-        __out
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::Felt],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let mut __offset = __offset;
-        let Q_low = G1Point::cairo_deserialize(__felts, __offset)?;
-        __offset += G1Point::cairo_serialized_size(&Q_low);
-        let Q_high = G1Point::cairo_deserialize(__felts, __offset)?;
-        __offset += G1Point::cairo_serialized_size(&Q_high);
-        let Q_high_shifted = G1Point::cairo_deserialize(__felts, __offset)?;
-        __offset += G1Point::cairo_serialized_size(&Q_high_shifted);
-        let RLCSumDlogDiv = FunctionFelt::cairo_deserialize(__felts, __offset)?;
-        __offset += FunctionFelt::cairo_serialized_size(&RLCSumDlogDiv);
-        Ok(MSMHint {
-            Q_low,
-            Q_high,
-            Q_high_shifted,
-            RLCSumDlogDiv,
-        })
-    }
-}
-#[derive(Debug, PartialEq)]
-pub struct MSMHintSmallScalar {
-    pub Q: G1Point,
-    pub SumDlogDiv: FunctionFelt,
-}
-impl cainome::cairo_serde::CairoSerde for MSMHintSmallScalar {
-    type RustType = Self;
-    const SERIALIZED_SIZE: std::option::Option<usize> = None;
-    #[inline]
-    fn cairo_serialized_size(__rust: &Self::RustType) -> usize {
-        let mut __size = 0;
-        __size += G1Point::cairo_serialized_size(&__rust.Q);
-        __size += FunctionFelt::cairo_serialized_size(&__rust.SumDlogDiv);
-        __size
-    }
-    fn cairo_serialize(__rust: &Self::RustType) -> Vec<starknet::core::types::Felt> {
-        let mut __out: Vec<starknet::core::types::Felt> = vec![];
-        __out.extend(G1Point::cairo_serialize(&__rust.Q));
-        __out.extend(FunctionFelt::cairo_serialize(&__rust.SumDlogDiv));
-        __out
-    }
-    fn cairo_deserialize(
-        __felts: &[starknet::core::types::Felt],
-        __offset: usize,
-    ) -> cainome::cairo_serde::Result<Self::RustType> {
-        let mut __offset = __offset;
-        let Q = G1Point::cairo_deserialize(__felts, __offset)?;
-        __offset += G1Point::cairo_serialized_size(&Q);
-        let SumDlogDiv = FunctionFelt::cairo_deserialize(__felts, __offset)?;
-        __offset += FunctionFelt::cairo_serialized_size(&SumDlogDiv);
-        Ok(MSMHintSmallScalar {
-            Q,
-            SumDlogDiv,
-        })
     }
 }
 #[derive(Debug, PartialEq)]
@@ -369,76 +201,20 @@ impl<A: starknet::accounts::ConnectedAccount + Sync> UniversalECIP<A> {
     #[allow(clippy::too_many_arguments)]
     pub fn msm_g1(
         &self,
-        scalars_digits_decompositions: &Option<
-            Vec<(Vec<starknet::core::types::Felt>, Vec<starknet::core::types::Felt>)>,
-        >,
-        msm_hint: &MSMHint,
-        derive_point_from_x_hint: &DerivePointFromXHint,
         points: &Vec<G1Point>,
         scalars: &Vec<cainome::cairo_serde::U256>,
         curve_index: &u32,
+        hint: &Vec<starknet::core::types::Felt>,
     ) -> cainome::cairo_serde::call::FCall<A::Provider, G1Point> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata
-            .extend(
-                Option::<
-                    Vec<
-                        (
-                            Vec<starknet::core::types::Felt>,
-                            Vec<starknet::core::types::Felt>,
-                        ),
-                    >,
-                >::cairo_serialize(scalars_digits_decompositions),
-            );
-        __calldata.extend(MSMHint::cairo_serialize(msm_hint));
-        __calldata
-            .extend(DerivePointFromXHint::cairo_serialize(derive_point_from_x_hint));
         __calldata.extend(Vec::<G1Point>::cairo_serialize(points));
         __calldata.extend(Vec::<cainome::cairo_serde::U256>::cairo_serialize(scalars));
         __calldata.extend(u32::cairo_serialize(curve_index));
+        __calldata.extend(Vec::<starknet::core::types::Felt>::cairo_serialize(hint));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!("msm_g1"),
-            calldata: __calldata,
-        };
-        cainome::cairo_serde::call::FCall::new(__call, self.provider())
-    }
-    #[allow(clippy::ptr_arg)]
-    #[allow(clippy::too_many_arguments)]
-    pub fn msm_g1_u128(
-        &self,
-        scalars_digits_decompositions: &Option<
-            Vec<(Vec<starknet::core::types::Felt>, Vec<starknet::core::types::Felt>)>,
-        >,
-        msm_hint: &MSMHintSmallScalar,
-        derive_point_from_x_hint: &DerivePointFromXHint,
-        points: &Vec<G1Point>,
-        scalars: &Vec<u128>,
-        curve_index: &u32,
-    ) -> cainome::cairo_serde::call::FCall<A::Provider, G1Point> {
-        use cainome::cairo_serde::CairoSerde;
-        let mut __calldata = vec![];
-        __calldata
-            .extend(
-                Option::<
-                    Vec<
-                        (
-                            Vec<starknet::core::types::Felt>,
-                            Vec<starknet::core::types::Felt>,
-                        ),
-                    >,
-                >::cairo_serialize(scalars_digits_decompositions),
-            );
-        __calldata.extend(MSMHintSmallScalar::cairo_serialize(msm_hint));
-        __calldata
-            .extend(DerivePointFromXHint::cairo_serialize(derive_point_from_x_hint));
-        __calldata.extend(Vec::<G1Point>::cairo_serialize(points));
-        __calldata.extend(Vec::<u128>::cairo_serialize(scalars));
-        __calldata.extend(u32::cairo_serialize(curve_index));
-        let __call = starknet::core::types::FunctionCall {
-            contract_address: self.address,
-            entry_point_selector: starknet::macros::selector!("msm_g1_u128"),
             calldata: __calldata,
         };
         cainome::cairo_serde::call::FCall::new(__call, self.provider())
@@ -449,76 +225,20 @@ impl<P: starknet::providers::Provider + Sync> UniversalECIPReader<P> {
     #[allow(clippy::too_many_arguments)]
     pub fn msm_g1(
         &self,
-        scalars_digits_decompositions: &Option<
-            Vec<(Vec<starknet::core::types::Felt>, Vec<starknet::core::types::Felt>)>,
-        >,
-        msm_hint: &MSMHint,
-        derive_point_from_x_hint: &DerivePointFromXHint,
         points: &Vec<G1Point>,
         scalars: &Vec<cainome::cairo_serde::U256>,
         curve_index: &u32,
+        hint: &Vec<starknet::core::types::Felt>,
     ) -> cainome::cairo_serde::call::FCall<P, G1Point> {
         use cainome::cairo_serde::CairoSerde;
         let mut __calldata = vec![];
-        __calldata
-            .extend(
-                Option::<
-                    Vec<
-                        (
-                            Vec<starknet::core::types::Felt>,
-                            Vec<starknet::core::types::Felt>,
-                        ),
-                    >,
-                >::cairo_serialize(scalars_digits_decompositions),
-            );
-        __calldata.extend(MSMHint::cairo_serialize(msm_hint));
-        __calldata
-            .extend(DerivePointFromXHint::cairo_serialize(derive_point_from_x_hint));
         __calldata.extend(Vec::<G1Point>::cairo_serialize(points));
         __calldata.extend(Vec::<cainome::cairo_serde::U256>::cairo_serialize(scalars));
         __calldata.extend(u32::cairo_serialize(curve_index));
+        __calldata.extend(Vec::<starknet::core::types::Felt>::cairo_serialize(hint));
         let __call = starknet::core::types::FunctionCall {
             contract_address: self.address,
             entry_point_selector: starknet::macros::selector!("msm_g1"),
-            calldata: __calldata,
-        };
-        cainome::cairo_serde::call::FCall::new(__call, self.provider())
-    }
-    #[allow(clippy::ptr_arg)]
-    #[allow(clippy::too_many_arguments)]
-    pub fn msm_g1_u128(
-        &self,
-        scalars_digits_decompositions: &Option<
-            Vec<(Vec<starknet::core::types::Felt>, Vec<starknet::core::types::Felt>)>,
-        >,
-        msm_hint: &MSMHintSmallScalar,
-        derive_point_from_x_hint: &DerivePointFromXHint,
-        points: &Vec<G1Point>,
-        scalars: &Vec<u128>,
-        curve_index: &u32,
-    ) -> cainome::cairo_serde::call::FCall<P, G1Point> {
-        use cainome::cairo_serde::CairoSerde;
-        let mut __calldata = vec![];
-        __calldata
-            .extend(
-                Option::<
-                    Vec<
-                        (
-                            Vec<starknet::core::types::Felt>,
-                            Vec<starknet::core::types::Felt>,
-                        ),
-                    >,
-                >::cairo_serialize(scalars_digits_decompositions),
-            );
-        __calldata.extend(MSMHintSmallScalar::cairo_serialize(msm_hint));
-        __calldata
-            .extend(DerivePointFromXHint::cairo_serialize(derive_point_from_x_hint));
-        __calldata.extend(Vec::<G1Point>::cairo_serialize(points));
-        __calldata.extend(Vec::<u128>::cairo_serialize(scalars));
-        __calldata.extend(u32::cairo_serialize(curve_index));
-        let __call = starknet::core::types::FunctionCall {
-            contract_address: self.address,
-            entry_point_selector: starknet::macros::selector!("msm_g1_u128"),
             calldata: __calldata,
         };
         cainome::cairo_serde::call::FCall::new(__call, self.provider())

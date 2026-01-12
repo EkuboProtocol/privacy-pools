@@ -2,7 +2,15 @@ use std::collections::HashMap;
 
 use cainome::rs::Abigen;
 
+// Contract artifact paths
+const ECIP_CONTRACT: &str = "../target/dev/pool_UniversalECIP.contract_class.json";
+const VERIFIER_CONTRACT: &str = "../target/dev/pool_Groth16VerifierBN254.contract_class.json";
+const POOL_CONTRACT: &str = "../target/dev/pool_Pool.contract_class.json";
+
 fn main() {
+    // rerun if pool/src/ changes
+    println!("cargo:rerun-if-changed=../pool/src/");
+    
     ecip();
     verifier();
     pool();
@@ -15,13 +23,10 @@ fn ecip() {
         String::from("Groth16VerifierBN254Event"),
     );
 
-    let abigen = Abigen::new(
-        "UniversalECIP",
-        "../target/dev/pool_UniversalECIP.contract_class.json",
-    )
-    .with_types_aliases(aliases)
-    .with_derives(vec!["Debug".to_string(), "PartialEq".to_string()])
-    .with_contract_derives(vec!["Debug".to_string(), "Clone".to_string()]);
+    let abigen = Abigen::new("UniversalECIP", ECIP_CONTRACT)
+        .with_types_aliases(aliases)
+        .with_derives(vec!["Debug".to_string(), "PartialEq".to_string()])
+        .with_contract_derives(vec!["Debug".to_string(), "Clone".to_string()]);
 
     abigen
         .generate()
@@ -37,13 +42,10 @@ fn verifier() {
         String::from("Groth16VerifierBN254Event"),
     );
 
-    let abigen = Abigen::new(
-        "Groth16VerifierBN254",
-        "../target/dev/pool_Groth16VerifierBN254.contract_class.json",
-    )
-    .with_types_aliases(aliases)
-    .with_derives(vec!["Debug".to_string(), "PartialEq".to_string()])
-    .with_contract_derives(vec!["Debug".to_string(), "Clone".to_string()]);
+    let abigen = Abigen::new("Groth16VerifierBN254", VERIFIER_CONTRACT)
+        .with_types_aliases(aliases)
+        .with_derives(vec!["Debug".to_string(), "PartialEq".to_string()])
+        .with_contract_derives(vec!["Debug".to_string(), "Clone".to_string()]);
 
     abigen
         .generate()
@@ -67,7 +69,7 @@ fn pool() {
         String::from("MerkleTreeEvent"),
     );
 
-    let abigen = Abigen::new("Pool", "../target/dev/pool_Pool.contract_class.json")
+    let abigen = Abigen::new("Pool", POOL_CONTRACT)
         .with_types_aliases(aliases)
         .with_derives(vec!["Debug".to_string(), "PartialEq".to_string()])
         .with_contract_derives(vec!["Debug".to_string(), "Clone".to_string()]);

@@ -9,6 +9,7 @@ edition.workspace = true
 garaga.workspace = true
 openzeppelin.workspace = true
 starknet.workspace = true
+ekubo.workspace = true
 
 [dev-dependencies]
 snforge_std.workspace = true

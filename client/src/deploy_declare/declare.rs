@@ -18,7 +18,7 @@ use std::sync::Arc;
 
 use starknet::{
     accounts::{Account, SingleOwnerAccount},
-    core::types::contract::{CompiledClass, SierraClass},
+    core::types::{contract::{CompiledClass, SierraClass}, DeclareTransactionResult, Felt},
     providers::{JsonRpcClient, Provider},
     signers::Signer,
 };
@@ -116,12 +116,30 @@ impl<'a, T> ContractDeclaration<'a, T> {
             .flatten()
             .map_err(|e| e.to_string())?;
 
+        // Compute the class hash before declaration so we can return it if already declared
+        let class_hash = flattened_class.class_hash();
+
         let declaration_result = account
             .declare_v3(Arc::new(flattened_class), casm_class_hash)
             .send()
-            .await
-            .unwrap();
+            .await;
 
-        Ok(PendingDeclaration::from((declaration_result, self.client)))
+        match declaration_result {
+            Ok(result) => Ok(PendingDeclaration::from((result, self.client))),
+            Err(err) => {
+                // Use Debug format to get nested error details including execution_error
+                let err_debug = format!("{:?}", err);
+                // Handle "already declared" as success - the class exists on-chain
+                if err_debug.contains("already declared") {
+                    let result = DeclareTransactionResult {
+                        transaction_hash: Felt::ZERO,
+                        class_hash,
+                    };
+                    Ok(PendingDeclaration::new_already_complete(result, self.client))
+                } else {
+                    Err(err.to_string())
+                }
+            }
+        }
     }
 }

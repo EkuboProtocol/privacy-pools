@@ -2,9 +2,9 @@ mod account;
 mod ecip;
 mod merkle;
 mod pool;
-mod verifier;
 mod poseidon;
-
+pub mod privacy_router;
+mod verifier;
 use core::circuit::u384;
 use poseidon::run_poseidon_grumpkin_circuit;
 

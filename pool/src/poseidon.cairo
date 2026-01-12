@@ -1,9 +1,8 @@
 use core::circuit::{
-    u384, circuit_add, circuit_mul, EvalCircuitTrait, CircuitOutputsTrait, CircuitInputs, CircuitModulus
+    CircuitElement as CE, CircuitInput as CI, CircuitInputs, CircuitModulus, CircuitOutputsTrait,
+    EvalCircuitTrait, circuit_add, circuit_mul, u384,
 };
 use garaga::core::circuit::AddInputResultTrait2;
-use core::circuit::CircuitElement as CE;
-use core::circuit::CircuitInput as CI;
 
 fn get_GRUMPKIN_modulus() -> CircuitModulus {
     let modulus = TryInto::<
