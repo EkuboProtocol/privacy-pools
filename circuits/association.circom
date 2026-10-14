@@ -25,6 +25,8 @@ template AssociationChecker(levels) {
     signal input fee;      // not taking part in any computations
     signal input refund;   
     signal input refundCommitmentHash;
+    signal input refundSecret;
+    signal input refundNullifier;
     signal input commitmentAmount; 
     signal input nullifier;
     signal input secret;
@@ -52,6 +54,15 @@ template AssociationChecker(levels) {
     component compare2 = LessThan(AMOUNT_BITS);
     compare2.in <== [fee, commitmentAmount];
     compare2.out === 1;
+
+    // The pool inserts refundCommitmentHash as a new deposit leaf, so it must
+    // commit to exactly the refund amount that was subtracted from this
+    // withdrawal. When there is no refund this is a commitment to amount 0.
+    component refundHasher = CommitmentHasher();
+    refundHasher.nullifier <== refundNullifier;
+    refundHasher.secret <== refundSecret;
+    refundHasher.amount <== refund;
+    refundHasher.commitment === refundCommitmentHash;
 
     component hasher = CommitmentHasher();
     hasher.nullifier <== nullifier;
