@@ -1,0 +1,12 @@
+{
+  "name": "privacy-pools-circuit-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node association.test.mjs"
+  },
+  "devDependencies": {
+    "circomlibjs": "0.1.7",
+    "snarkjs": "0.7.5"
+  }
+}
