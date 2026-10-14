@@ -188,6 +188,8 @@ async fn main() {
                 fee: fee,
                 refund: refund_amount,
                 refund_commitment_hash: refund_commitment.hash(),
+                refund_secret: refund_commitment.secret,
+                refund_nullifier: refund_commitment.nullifier,
                 commitment_amount: amount,
                 nullifier: nullifier,
                 secret: secret,

@@ -8,6 +8,8 @@ template Pool(levels, associatedSetLevels) {
     signal input fee;      // not taking part in any computations
     signal input refund;   
     signal input refundCommitmentHash;
+    signal input refundSecret;
+    signal input refundNullifier;
     signal input commitmentAmount; 
     signal input nullifier;
     signal input secret;
@@ -22,6 +24,8 @@ template Pool(levels, associatedSetLevels) {
     withdraw.fee <== fee;
     withdraw.refund <== refund;
     withdraw.refundCommitmentHash <== refundCommitmentHash;
+    withdraw.refundSecret <== refundSecret;
+    withdraw.refundNullifier <== refundNullifier;
     withdraw.commitmentAmount <== commitmentAmount;
     withdraw.nullifier <== nullifier;
     withdraw.secret <== secret;
@@ -41,6 +45,8 @@ template Pool(levels, associatedSetLevels) {
     associatedSet.fee <== fee;
     associatedSet.refund <== refund;
     associatedSet.refundCommitmentHash <== refundCommitmentHash;
+    associatedSet.refundSecret <== refundSecret;
+    associatedSet.refundNullifier <== refundNullifier;
     associatedSet.commitmentAmount <== commitmentAmount;
     associatedSet.nullifier <== nullifier;
     associatedSet.secret <== secret;

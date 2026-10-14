@@ -1,6 +1,7 @@
 pragma circom 2.2.0;
 include "hash.circom";
 include "merkle_tree.circom";
+include "./circomlib/bitify.circom";
 include "./circomlib/comparators.circom";
 
 // computes Pedersen(nullifier + secret)
@@ -24,6 +25,8 @@ template AssociationChecker(levels) {
     signal input fee;      // not taking part in any computations
     signal input refund;   
     signal input refundCommitmentHash;
+    signal input refundSecret;
+    signal input refundNullifier;
     signal input commitmentAmount; 
     signal input nullifier;
     signal input secret;
@@ -31,14 +34,35 @@ template AssociationChecker(levels) {
     signal input pathIndices[levels];
     signal input amount;
     amount === commitmentAmount - refund;
-    
-    component compare = LessThan(252);
+
+    // LessThan(n) is only sound when both inputs are below 2^n: a wrapped field
+    // element such as p - k otherwise compares as the small negative number -k.
+    // Range check every value fed into a comparison. 2^252 < p on BN254, so the
+    // Num2Bits(252) decomposition is unique and amount is bounded as a result.
+    var AMOUNT_BITS = 252;
+    component refundBits = Num2Bits(AMOUNT_BITS);
+    refundBits.in <== refund;
+    component feeBits = Num2Bits(AMOUNT_BITS);
+    feeBits.in <== fee;
+    component commitmentAmountBits = Num2Bits(AMOUNT_BITS);
+    commitmentAmountBits.in <== commitmentAmount;
+
+    component compare = LessThan(AMOUNT_BITS);
     compare.in <== [refund, commitmentAmount];
     compare.out === 1;
 
-    component compare2 = LessThan(252);
+    component compare2 = LessThan(AMOUNT_BITS);
     compare2.in <== [fee, commitmentAmount];
     compare2.out === 1;
+
+    // The pool inserts refundCommitmentHash as a new deposit leaf, so it must
+    // commit to exactly the refund amount that was subtracted from this
+    // withdrawal. When there is no refund this is a commitment to amount 0.
+    component refundHasher = CommitmentHasher();
+    refundHasher.nullifier <== refundNullifier;
+    refundHasher.secret <== refundSecret;
+    refundHasher.amount <== refund;
+    refundHasher.commitment === refundCommitmentHash;
 
     component hasher = CommitmentHasher();
     hasher.nullifier <== nullifier;

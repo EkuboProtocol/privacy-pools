@@ -20,6 +20,8 @@ pub struct CircuitInput {
     pub fee: U256,
     pub refund: U256,
     pub refund_commitment_hash: U256,
+    pub refund_secret: U256,
+    pub refund_nullifier: U256,
     pub commitment_amount: U256,
     pub nullifier: U256,
     pub secret: U256,
@@ -49,6 +51,12 @@ pub struct Commitment {
 }
 
 impl Commitment {
+    /// Commitment used as the refund leaf when a withdrawal keeps nothing in
+    /// the pool. The circuit always binds `refundCommitmentHash` to the refund
+    /// amount, and a zero-amount commitment can never be withdrawn.
+    pub fn empty() -> Self {
+        Self::new(U256::ZERO, U256::ZERO, U256::ZERO)
+    }
     pub fn new(
         secret: impl Into<U256>,
         nullifier: impl Into<U256>,
@@ -99,14 +107,18 @@ impl CircuitInputCreator {
             .associated_set_merkle_tree
             .find_path(&self.commitment.hash())
             .unwrap();
-        let refund_amount = refund_commitment.map_or(U256::ZERO, |r| r.amount);
+        let empty = Commitment::empty();
+        let refund_commitment = refund_commitment.unwrap_or(&empty);
+        let refund_amount = refund_commitment.amount;
         CircuitInput {
             root: self.merkle_tree.root(),
             nullifier_hash: self.commitment.nullifier_hash(),
             recipient: U256::from_str(&self.recipient.to_string()).unwrap(),
             fee: self.fee,
             refund: refund_amount,
-            refund_commitment_hash: refund_commitment.map_or(U256::ZERO, Commitment::hash),
+            refund_commitment_hash: refund_commitment.hash(),
+            refund_secret: refund_commitment.secret,
+            refund_nullifier: refund_commitment.nullifier,
             commitment_amount: self.commitment.amount,
             nullifier: self.commitment.nullifier,
             secret: self.commitment.secret,

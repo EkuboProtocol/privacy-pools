@@ -79,6 +79,13 @@ The following tools and versions are required:
    cargo test
    ```
 
+9. Run the circuit constraint tests (positive and negative witnesses for the withdrawal relation; requires `circom` on `PATH`):
+   ```bash
+   cd circuits/test
+   npm install
+   npm test
+   ```
+
 ---
 
 ## Running the Example
