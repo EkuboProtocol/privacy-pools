@@ -25,7 +25,6 @@ where
         &'a self,
         execution: ExecutionV3<'b, A>,
     ) -> Result<PreparedExecutionV3<'b, A>, AccountError<A::SignError>> {
-        // Resolves nonce
         let nonce = self
             .account
             .get_nonce()

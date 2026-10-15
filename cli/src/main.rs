@@ -104,7 +104,6 @@ enum Commands {
 async fn main() {
     tracing_subscriber::fmt().with_max_level(Level::INFO).init();
 
-    // Parse arguments
     let args = Args::parse();
 
     let provider = JsonRpcClient::new(HttpTransport::new(args.url));

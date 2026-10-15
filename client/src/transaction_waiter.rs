@@ -79,8 +79,6 @@ impl Sleeper {
             use wasm_bindgen::JsCast;
             use web_sys::WorkerGlobalScope;
             let mut cb = |resolve: js_sys::Function, _reject: js_sys::Function| {
-                // if we are in a worker, use the global worker's scope
-                // otherwise, use the window's scope
                 if let Ok(worker_scope) = js_sys::global().dyn_into::<WorkerGlobalScope>() {
                     worker_scope
                         .set_timeout_with_callback_and_timeout_and_arguments_0(

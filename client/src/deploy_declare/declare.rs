@@ -109,7 +109,6 @@ impl<'a, T> ContractDeclaration<'a, T> {
             .class_hash()
             .map_err(|e| e.to_string())?;
 
-        // We need to flatten the ABI into a string first
         let flattened_class = self
             .contract_artifact
             .clone()

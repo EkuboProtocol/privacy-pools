@@ -44,7 +44,7 @@ impl OutputWaiter {
         let mut is_send = false;
         for line in reader.lines() {
             let line = line.expect("failed to read line from subprocess stdout");
-            println!("{}", line); // Log to parent stdout
+            println!("{}", line);
 
             if !is_send && line_predicate(&line) {
                 sender.send(()).expect("failed to send start signal");
