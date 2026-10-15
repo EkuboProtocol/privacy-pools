@@ -45,7 +45,6 @@ async fn main() {
         .with_max_level(Level::DEBUG)
         .init();
 
-    // Parse arguments
     let args = Args::parse();
 
     let starknet = StarkNet::new(args.provider_url, args.contract_address);
@@ -55,16 +54,13 @@ async fn main() {
         merkle_tree: Arc::new(Mutex::new(HybridMerkleTree::new_with_contract_height())),
     };
 
-    // Create a regular axum app.
     let app = Router::new()
         .route("/", post(deposit::handler))
         .route("/", get(withdraw::handler))
         .with_state(state);
 
-    // Create a `TcpListener` using tokio.
     let listener = TcpListener::bind(args.bind).await.unwrap();
 
-    // Run the server with graceful shutdown
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await
