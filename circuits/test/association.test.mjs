@@ -111,6 +111,14 @@ const cases = [
   ["refund commitment to a different amount", false, input({ commitmentAmount: 100n, refund: 30n, fee: 1n, refundCommitmentHash: commitmentHash(456n, 654n, 31n) })],
   ["refund commitment with different secret", false, input({ commitmentAmount: 100n, refund: 30n, fee: 1n, refundCommitmentHash: commitmentHash(457n, 654n, 30n) })],
   ["zero refund commitment hash", false, input({ commitmentAmount: 100n, refund: 0n, fee: 1n, refundCommitmentHash: 0n })],
+  // A prover may not plant a leaf for an amount it did not leave in the pool,
+  // even one it derived from its own refund secrets (issue #12).
+  ["refund commitment to an unpaid amount with zero refund", false, input({ commitmentAmount: 100n, refund: 0n, fee: 1n, refundCommitmentHash: commitmentHash(456n, 654n, 1_000_000n * 10n ** 18n) })],
+
+  // The zero-amount commitment inserted for a withdrawal without a refund
+  // (Commitment::empty() in the client) can never itself be withdrawn, since
+  // refund < 0 and fee < 0 are unsatisfiable for range-checked inputs.
+  ["zero-amount refund leaf cannot be withdrawn", false, input({ secret: 0n, nullifier: 0n, commitmentAmount: 0n, refund: 0n, fee: 0n })],
 
   // Unrelated commitment data.
   ["wrong nullifier hash", false, { ...input({ commitmentAmount: 100n, refund: 30n, fee: 1n }), nullifierHash: 1n }],
